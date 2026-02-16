@@ -22,11 +22,11 @@
 *.user
 *.suo
 
-# Installer build artifacts
-/installer/deps/
-/installer/Output/
-/installer/wizard.bmp
-/installer/wizard-small.bmp
+# Installer (local only)
+/installer/
+
+# Local build script
+build.ps1
 
 # Tools & misc
 gh.exe
