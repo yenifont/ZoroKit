@@ -36,6 +36,7 @@ Screenshot_*.png
 
 # Claude Code
 .claude/
+CLAUDE.md
 
 # OS
 Thumbs.db
