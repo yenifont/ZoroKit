@@ -1,0 +1,7 @@
+# Everything ignored by default (private repo - only README visible)
+*
+
+# Only track these files
+!.gitignore
+!README.md
+!LICENSE
