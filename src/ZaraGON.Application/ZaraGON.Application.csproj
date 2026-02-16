@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>ZaraGON.Application</RootNamespace>
+    <AssemblyName>ZaraGON.Application</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ZaraGON.Core\ZaraGON.Core.csproj" />
+  </ItemGroup>
+</Project>

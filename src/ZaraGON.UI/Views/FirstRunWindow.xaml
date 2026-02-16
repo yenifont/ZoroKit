@@ -1,0 +1,263 @@
+<Window x:Class="ZaraGON.UI.Views.FirstRunWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ZaraGON - Kurulum"
+        Height="520" Width="560"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent">
+
+    <Border Background="{StaticResource CardBackgroundBrush}" CornerRadius="16"
+            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="30" ShadowDepth="3" Opacity="0.18" Color="#000000" />
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Top accent bar -->
+            <Border Grid.Row="0" CornerRadius="16,16,0,0" Height="4">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#2196F3" Offset="0" />
+                        <GradientStop Color="#42A5F5" Offset="0.5" />
+                        <GradientStop Color="#64B5F6" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <!-- Main content -->
+            <Grid Grid.Row="1" Margin="44,28,44,32">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Logo + Title -->
+                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,20">
+                    <Image Source="/Resources/app.png" Width="64" Height="64"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           HorizontalAlignment="Center" Margin="0,0,0,12" />
+                    <TextBlock Text="ZaraGON" FontSize="26" FontWeight="SemiBold"
+                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="Gelistirme ortaminiz hazirlaniyor"
+                               FontSize="13" Foreground="{StaticResource SecondaryTextBrush}"
+                               HorizontalAlignment="Center" Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Status Message -->
+                <TextBlock x:Name="StatusText" Grid.Row="1"
+                           Text="Hazırlaniyor..."
+                           FontSize="13" FontWeight="Medium"
+                           Foreground="{StaticResource PrimaryTextBrush}"
+                           HorizontalAlignment="Center" Margin="0,0,0,20"
+                           TextWrapping="Wrap" TextAlignment="Center" />
+
+                <!-- Separator line -->
+                <Border Grid.Row="2" Height="1" Background="{StaticResource BorderBrush}"
+                        Margin="0,0,0,20" Opacity="0.5" />
+
+                <!-- Progress Section -->
+                <StackPanel Grid.Row="3" VerticalAlignment="Center">
+                    <!-- Apache Progress -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="60" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="ApacheLabel" Text="Apache HTTP Server"
+                                   Grid.Column="0" FontSize="12"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   VerticalAlignment="Center" />
+                        <ProgressBar x:Name="ApacheProgress" Grid.Column="1"
+                                     Height="8" Minimum="0" Maximum="100" Value="0"
+                                     Foreground="{StaticResource PrimaryBrush}"
+                                     Background="{StaticResource InputBackgroundBrush}">
+                            <ProgressBar.Resources>
+                                <Style TargetType="ProgressBar">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ProgressBar">
+                                                <Grid>
+                                                    <Border x:Name="PART_Track"
+                                                            Background="{TemplateBinding Background}"
+                                                            CornerRadius="4" />
+                                                    <Border x:Name="PART_Indicator"
+                                                            Background="{TemplateBinding Foreground}"
+                                                            CornerRadius="4"
+                                                            HorizontalAlignment="Left" />
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ProgressBar.Resources>
+                        </ProgressBar>
+                        <TextBlock x:Name="ApachePercent" Text=""
+                                   Grid.Column="2" FontSize="11"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- VC++ Runtime Progress -->
+                    <Grid x:Name="VcRedistRow" Margin="0,0,0,14" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="60" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="VcRedistLabel" Text="VC++ Runtime"
+                                   Grid.Column="0" FontSize="12"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   VerticalAlignment="Center" />
+                        <ProgressBar x:Name="VcRedistProgress" Grid.Column="1"
+                                     Height="8" Minimum="0" Maximum="100" Value="0"
+                                     Foreground="#FF9800"
+                                     Background="{StaticResource InputBackgroundBrush}">
+                            <ProgressBar.Resources>
+                                <Style TargetType="ProgressBar">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ProgressBar">
+                                                <Grid>
+                                                    <Border x:Name="PART_Track"
+                                                            Background="{TemplateBinding Background}"
+                                                            CornerRadius="4" />
+                                                    <Border x:Name="PART_Indicator"
+                                                            Background="{TemplateBinding Foreground}"
+                                                            CornerRadius="4"
+                                                            HorizontalAlignment="Left" />
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ProgressBar.Resources>
+                        </ProgressBar>
+                        <TextBlock x:Name="VcRedistPercent" Text=""
+                                   Grid.Column="2" FontSize="11"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- PHP Progress -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="60" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="PhpLabel" Text="PHP"
+                                   Grid.Column="0" FontSize="12"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   VerticalAlignment="Center" />
+                        <ProgressBar x:Name="PhpProgress" Grid.Column="1"
+                                     Height="8" Minimum="0" Maximum="100" Value="0"
+                                     Foreground="{StaticResource SuccessBrush}"
+                                     Background="{StaticResource InputBackgroundBrush}">
+                            <ProgressBar.Resources>
+                                <Style TargetType="ProgressBar">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ProgressBar">
+                                                <Grid>
+                                                    <Border x:Name="PART_Track"
+                                                            Background="{TemplateBinding Background}"
+                                                            CornerRadius="4" />
+                                                    <Border x:Name="PART_Indicator"
+                                                            Background="{TemplateBinding Foreground}"
+                                                            CornerRadius="4"
+                                                            HorizontalAlignment="Left" />
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ProgressBar.Resources>
+                        </ProgressBar>
+                        <TextBlock x:Name="PhpPercent" Text=""
+                                   Grid.Column="2" FontSize="11"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- MariaDB Progress -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="60" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="MariaDbLabel" Text="MariaDB"
+                                   Grid.Column="0" FontSize="12"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   VerticalAlignment="Center" />
+                        <ProgressBar x:Name="MariaDbProgress" Grid.Column="1"
+                                     Height="8" Minimum="0" Maximum="100" Value="0"
+                                     Foreground="{StaticResource InfoBrush}"
+                                     Background="{StaticResource InputBackgroundBrush}">
+                            <ProgressBar.Resources>
+                                <Style TargetType="ProgressBar">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ProgressBar">
+                                                <Grid>
+                                                    <Border x:Name="PART_Track"
+                                                            Background="{TemplateBinding Background}"
+                                                            CornerRadius="4" />
+                                                    <Border x:Name="PART_Indicator"
+                                                            Background="{TemplateBinding Foreground}"
+                                                            CornerRadius="4"
+                                                            HorizontalAlignment="Left" />
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ProgressBar.Resources>
+                        </ProgressBar>
+                        <TextBlock x:Name="MariaDbPercent" Text=""
+                                   Grid.Column="2" FontSize="11"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <!-- Detail text -->
+                    <TextBlock x:Name="DetailText" Text=""
+                               FontSize="11" Foreground="{StaticResource MutedTextBrush}"
+                               HorizontalAlignment="Center" Margin="0,8,0,0"
+                               TextWrapping="Wrap" TextAlignment="Center" />
+
+                    <!-- Error buttons (hidden by default) -->
+                    <WrapPanel x:Name="ErrorButtons" HorizontalAlignment="Center" Margin="0,16,0,0" Visibility="Collapsed">
+                        <Button x:Name="RetryButton" Content="Tekrar Dene" Style="{StaticResource ActionButtonStyle}"
+                                Margin="0,0,8,0" Click="RetryButton_Click" />
+                        <Button x:Name="SkipButton" Content="Kurulumu Atla" Style="{StaticResource GhostButtonStyle}"
+                                Click="SkipButton_Click" />
+                    </WrapPanel>
+                </StackPanel>
+
+                <!-- Separator -->
+                <Border Grid.Row="4" Height="1" Background="{StaticResource BorderBrush}"
+                        Margin="0,16,0,12" Opacity="0.5" />
+
+                <!-- Bottom -->
+                <TextBlock x:Name="BottomText" Grid.Row="5"
+                           Text="Bu islem yalnizca bir kez gerceklesir"
+                           FontSize="11" Foreground="{StaticResource MutedTextBrush}"
+                           HorizontalAlignment="Center" FontStyle="Italic" />
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

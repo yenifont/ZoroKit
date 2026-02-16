@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ZaraGON.Application/ZaraGON.Application.csproj" />
+    <Project Path="src/ZaraGON.Core/ZaraGON.Core.csproj" />
+    <Project Path="src/ZaraGON.Infrastructure/ZaraGON.Infrastructure.csproj" />
+    <Project Path="src/ZaraGON.UI/ZaraGON.UI.csproj" />
+  </Folder>
+</Solution>

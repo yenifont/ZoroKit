@@ -1,0 +1,512 @@
+<UserControl x:Class="ZaraGON.UI.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:ZaraGON.UI.Converters">
+
+    <UserControl.Resources>
+        <converters:ServiceStatusToColorConverter x:Key="StatusColorConverter" />
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
+        <StackPanel Margin="24,20,24,24">
+            <!-- Page Header -->
+            <DockPanel Margin="0,0,0,0">
+                <Button DockPanel.Dock="Right" Content="Apache Yeniden Y&#252;kle" FontSize="11"
+                        Foreground="{StaticResource PrimaryBrush}" Background="Transparent"
+                        BorderThickness="0" Padding="0" Cursor="Hand" VerticalAlignment="Bottom"
+                        Margin="0,0,0,4" Command="{Binding ReloadApacheCommand}"
+                        Visibility="{Binding CanReloadApache, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <StackPanel>
+                    <TextBlock Text="Kontrol Paneli" Style="{StaticResource PageTitleStyle}" />
+                    <TextBlock Text="Geli&#351;tirme servislerinizi izleyin ve y&#246;netin" Style="{StaticResource PageSubtitleStyle}" />
+                </StackPanel>
+            </DockPanel>
+
+            <!-- Service Cards Grid -->
+            <UniformGrid Columns="3" Margin="0,0,0,6">
+                <!-- Apache Card -->
+                <Border Style="{StaticResource CardStyle}" Margin="0,0,8,8" Padding="14,12">
+                    <DockPanel>
+                        <!-- Right: Toggle -->
+                        <ToggleButton DockPanel.Dock="Right"
+                                      Style="{StaticResource ToggleSwitchStyle}"
+                                      IsChecked="{Binding IsApacheRunning, Mode=OneWay}"
+                                      Command="{Binding ToggleApacheCommand}"
+                                      IsEnabled="{Binding CanToggleApache}"
+                                      VerticalAlignment="Center" Margin="10,0,0,0" />
+                        <!-- Left: Icon + Info -->
+                        <Border Width="38" Height="38" CornerRadius="10"
+                                Background="{StaticResource PrimaryLightBrush}" Margin="0,0,12,0"
+                                VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="Server" Width="19" Height="19"
+                                                     Foreground="{StaticResource PrimaryBrush}"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Apache" FontSize="13.5" FontWeight="SemiBold"
+                                           Foreground="{StaticResource PrimaryTextBrush}" />
+                                <Ellipse Width="9" Height="9" Margin="8,0,0,0"
+                                         Fill="{Binding ApacheStatus, Converter={StaticResource StatusColorConverter}}"
+                                         VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,2,0,0">
+                                <Run Text="v" /><Run Text="{Binding ActiveApacheVersion, Mode=OneWay}" />
+                                <Run Text=" &#183; Port " /><Run Text="{Binding ApachePort, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- PHP Card -->
+                <Border Style="{StaticResource CardStyle}" Margin="4,0,4,8" Padding="14,12">
+                    <DockPanel>
+                        <!-- Right: Module badge -->
+                        <Border Background="#F0F0FF" CornerRadius="5" Padding="8,3"
+                                DockPanel.Dock="Right" VerticalAlignment="Center" Margin="10,0,0,0">
+                            <TextBlock Text="Module" FontSize="10.5" FontWeight="Medium" Foreground="#6366F1" />
+                        </Border>
+                        <!-- Left: Icon + Info -->
+                        <Border Width="38" Height="38" CornerRadius="10"
+                                Background="#F0F0FF" Margin="0,0,12,0"
+                                VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="LanguagePhp" Width="20" Height="20"
+                                                     Foreground="#6366F1"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="PHP" FontSize="13.5" FontWeight="SemiBold"
+                                       Foreground="{StaticResource PrimaryTextBrush}" />
+                            <TextBlock FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,2,0,0">
+                                <Run Text="v" /><Run Text="{Binding ActivePhpVersion, Mode=OneWay}" />
+                                <Run Text=" &#183; Apache mod" />
+                            </TextBlock>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- MariaDB Card -->
+                <Border Style="{StaticResource CardStyle}" Margin="8,0,0,8" Padding="14,12">
+                    <DockPanel>
+                        <!-- Right: Toggle -->
+                        <ToggleButton DockPanel.Dock="Right"
+                                      Style="{StaticResource ToggleSwitchStyle}"
+                                      IsChecked="{Binding IsMariaDbRunning, Mode=OneWay}"
+                                      Command="{Binding ToggleMariaDbCommand}"
+                                      IsEnabled="{Binding CanToggleMariaDb}"
+                                      VerticalAlignment="Center" Margin="10,0,0,0" />
+                        <!-- Left: Icon + Info -->
+                        <Border Width="38" Height="38" CornerRadius="10"
+                                Background="#FFF7ED" Margin="0,0,12,0"
+                                VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="Database" Width="19" Height="19"
+                                                     Foreground="#EA580C"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="MariaDB" FontSize="13.5" FontWeight="SemiBold"
+                                           Foreground="{StaticResource PrimaryTextBrush}" />
+                                <Ellipse Width="9" Height="9" Margin="8,0,0,0"
+                                         Fill="{Binding MariaDbStatus, Converter={StaticResource StatusColorConverter}}"
+                                         VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,2,0,0">
+                                <Run Text="v" /><Run Text="{Binding ActiveMariaDbVersion, Mode=OneWay}" />
+                                <Run Text=" &#183; Port " /><Run Text="{Binding MysqlPort, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </UniformGrid>
+
+            <!-- Quick Access -->
+            <UniformGrid Columns="4" Margin="0,0,0,6">
+                <Border Style="{StaticResource CardStyle}" Margin="0,0,4,0" Padding="8,6" Cursor="Hand"
+                        MouseLeftButtonDown="ShortcutCard_Click" Tag="Terminal">
+                    <DockPanel>
+                        <materialDesign:PackIcon Kind="OpenInNew" Width="11" Height="11"
+                                                 Foreground="{StaticResource MutedTextBrush}"
+                                                 DockPanel.Dock="Right" VerticalAlignment="Center" />
+                        <materialDesign:PackIcon Kind="Console" Width="15" Height="15" Foreground="#16A34A"
+                                                 Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Terminal" FontSize="11.5" FontWeight="Medium"
+                                   Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center" />
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource CardStyle}" Margin="2,0,2,0" Padding="8,6" Cursor="Hand"
+                        MouseLeftButtonDown="ShortcutCard_Click" Tag="PhpMyAdmin">
+                    <DockPanel>
+                        <materialDesign:PackIcon Kind="OpenInNew" Width="11" Height="11"
+                                                 Foreground="{StaticResource MutedTextBrush}"
+                                                 DockPanel.Dock="Right" VerticalAlignment="Center" />
+                        <materialDesign:PackIcon Kind="DatabaseSearch" Width="15" Height="15" Foreground="#EA580C"
+                                                 Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="phpMyAdmin" FontSize="11" FontWeight="Medium"
+                                   Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center" />
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource CardStyle}" Margin="2,0,2,0" Padding="8,6" Cursor="Hand"
+                        MouseLeftButtonDown="ShortcutCard_Click" Tag="Web">
+                    <DockPanel>
+                        <materialDesign:PackIcon Kind="OpenInNew" Width="11" Height="11"
+                                                 Foreground="{StaticResource MutedTextBrush}"
+                                                 DockPanel.Dock="Right" VerticalAlignment="Center" />
+                        <materialDesign:PackIcon Kind="Web" Width="15" Height="15" Foreground="{StaticResource PrimaryBrush}"
+                                                 Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Localhost" FontSize="11.5" FontWeight="Medium"
+                                   Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center" />
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource CardStyle}" Margin="4,0,0,0" Padding="8,6" Cursor="Hand"
+                        MouseLeftButtonDown="ShortcutCard_Click" Tag="Root">
+                    <DockPanel>
+                        <materialDesign:PackIcon Kind="OpenInNew" Width="11" Height="11"
+                                                 Foreground="{StaticResource MutedTextBrush}"
+                                                 DockPanel.Dock="Right" VerticalAlignment="Center" />
+                        <materialDesign:PackIcon Kind="FolderOpen" Width="15" Height="15" Foreground="#7C3AED"
+                                                 Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Root" FontSize="11.5" FontWeight="Medium"
+                                   Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center" />
+                    </DockPanel>
+                </Border>
+            </UniformGrid>
+
+            <!-- Quick Actions & Health -->
+            <Grid Margin="0,0,0,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,12">
+                            <materialDesign:PackIcon Kind="LightningBolt" Width="16" Height="16"
+                                                     Foreground="{StaticResource PrimaryBrush}" Margin="0,0,8,0"
+                                                     VerticalAlignment="Center" />
+                            <TextBlock Text="H&#305;zl&#305; &#304;&#351;lemler" Style="{StaticResource SectionHeaderStyle}" Margin="0" VerticalAlignment="Center" />
+                        </DockPanel>
+
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Button Content="T&#252;m&#252;n&#252; Ba&#351;lat" Style="{StaticResource SuccessButtonStyle}"
+                                    Command="{Binding StartAllCommand}" Grid.Column="0"
+                                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                                    HorizontalAlignment="Stretch" />
+                            <Button Content="T&#252;m&#252;n&#252; Durdur" Style="{StaticResource DangerButtonStyle}"
+                                    Command="{Binding StopAllCommand}" Grid.Column="2"
+                                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                                    HorizontalAlignment="Stretch" />
+                        </Grid>
+
+                        <Button Style="{StaticResource GhostButtonStyle}"
+                                Command="{Binding RefreshHealthCommand}" Margin="0,6,0,0"
+                                HorizontalAlignment="Stretch" Padding="10,5">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="HeartPulse" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Sa&#287;l&#305;k Kontrol&#252;" FontSize="11.5" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Tunnel -->
+                        <Button Command="{Binding ToggleTunnelCommand}" Margin="0,6,0,0"
+                                HorizontalAlignment="Stretch" Padding="10,5">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource GhostButtonStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsTunnelRunning}" Value="True">
+                                            <Setter Property="Background" Value="#FEF2F2" />
+                                            <Setter Property="Foreground" Value="#DC2626" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="TunnelOutline" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock FontSize="11.5" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="T&#252;nel Ba&#351;lat" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsTunnelRunning}" Value="True">
+                                                    <Setter Property="Text" Value="T&#252;neli Kapat" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Tunnel URL -->
+                        <Border Background="{StaticResource InputBackgroundBrush}" CornerRadius="6"
+                                Padding="10,6" Margin="0,4,0,0"
+                                Visibility="{Binding IsTunnelRunning, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <DockPanel>
+                                <Ellipse Width="7" Height="7" Fill="#16A34A" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding TunnelUrl}" FontSize="10.5" VerticalAlignment="Center"
+                                           Foreground="{StaticResource PrimaryBrush}" TextTrimming="CharacterEllipsis"
+                                           ToolTip="{Binding TunnelUrl}" />
+                            </DockPanel>
+                        </Border>
+
+                        <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource StatusTextStyle}" Margin="0,8,0,0" FontSize="11" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,12">
+                            <materialDesign:PackIcon Kind="HeartPulse" Width="16" Height="16"
+                                                     Foreground="{StaticResource SuccessBrush}" Margin="0,0,8,0"
+                                                     VerticalAlignment="Center" />
+                            <TextBlock Text="Sa&#287;l&#305;k Durumu" Style="{StaticResource SectionHeaderStyle}" Margin="0" VerticalAlignment="Center" />
+                            <Button Content="Yenile" Style="{StaticResource GhostButtonStyle}"
+                                    Command="{Binding RefreshHealthCommand}" DockPanel.Dock="Right"
+                                    HorizontalAlignment="Right" Padding="8,3" FontSize="11" />
+                        </DockPanel>
+
+                        <ItemsControl ItemsSource="{Binding HealthResults}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{StaticResource InputBackgroundBrush}" CornerRadius="6"
+                                            Padding="10,7" Margin="0,2">
+                                        <DockPanel>
+                                            <Border Width="24" Height="24" CornerRadius="6" DockPanel.Dock="Left" Margin="0,0,10,0">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="{StaticResource ErrorLightBrush}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsHealthy}" Value="True">
+                                                                <Setter Property="Background" Value="{StaticResource SuccessLightBrush}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <materialDesign:PackIcon Width="12" Height="12"
+                                                                         HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <materialDesign:PackIcon.Style>
+                                                        <Style TargetType="materialDesign:PackIcon">
+                                                            <Setter Property="Kind" Value="Close" />
+                                                            <Setter Property="Foreground" Value="{StaticResource ErrorBrush}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsHealthy}" Value="True">
+                                                                    <Setter Property="Kind" Value="Check" />
+                                                                    <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </materialDesign:PackIcon.Style>
+                                                </materialDesign:PackIcon>
+                                            </Border>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding CheckName}" Foreground="{StaticResource PrimaryTextBrush}"
+                                                           FontWeight="Medium" FontSize="12" />
+                                                <TextBlock Text="{Binding Message}" Foreground="{StaticResource SecondaryTextBrush}"
+                                                           FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Database Tools -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,12">
+                        <materialDesign:PackIcon Kind="DatabaseCog" Width="16" Height="16"
+                                                 Foreground="#EA580C" Margin="0,0,8,0"
+                                                 VerticalAlignment="Center" />
+                        <TextBlock Text="Veritaban&#305; Ara&#231;lar&#305;" Style="{StaticResource SectionHeaderStyle}" Margin="0" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <UniformGrid Columns="3">
+                        <Button Style="{StaticResource SuccessButtonStyle}" Margin="0,0,3,0"
+                                Command="{Binding CreateDatabaseCommand}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                                HorizontalAlignment="Stretch">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="DatabasePlus" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Olu&#351;tur" VerticalAlignment="Center" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource GhostButtonStyle}" Margin="3,0,3,0"
+                                Command="{Binding ImportDatabaseCommand}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                                HorizontalAlignment="Stretch">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="DatabaseImport" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock Text="&#304;&#231;e Aktar" VerticalAlignment="Center" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource GhostButtonStyle}" Margin="3,0,0,0"
+                                Command="{Binding BackupDatabaseCommand}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                                HorizontalAlignment="Stretch">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="DatabaseExport" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Yedekle" VerticalAlignment="Center" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Config Files -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,12">
+                        <materialDesign:PackIcon Kind="FileEditOutline" Width="16" Height="16"
+                                                 Foreground="{StaticResource PrimaryBrush}" Margin="0,0,8,0"
+                                                 VerticalAlignment="Center" />
+                        <TextBlock Text="Yap&#305;land&#305;rma Dosyalar&#305;" Style="{StaticResource SectionHeaderStyle}" Margin="0" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <UniformGrid Columns="3">
+                        <Button Style="{StaticResource GhostButtonStyle}" Command="{Binding OpenApacheConfigCommand}"
+                                Margin="0,0,4,0" HorizontalAlignment="Stretch">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="Server" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock Text="httpd.conf" VerticalAlignment="Center" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource GhostButtonStyle}" Command="{Binding OpenPhpIniCommand}"
+                                Margin="2,0,2,0" HorizontalAlignment="Stretch">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="LanguagePhp" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock Text="php.ini" VerticalAlignment="Center" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource GhostButtonStyle}" Command="{Binding OpenMariaDbConfigCommand}"
+                                Margin="4,0,0,0" HorizontalAlignment="Stretch">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="Database" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock Text="my.ini" VerticalAlignment="Center" FontSize="12" />
+                            </StackPanel>
+                        </Button>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- MariaDB Settings -->
+            <Border Style="{StaticResource CardStyle}" Padding="14,12">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <materialDesign:PackIcon Kind="DatabaseCog" Width="15" Height="15"
+                                                 Foreground="#EA580C" Margin="0,0,8,0"
+                                                 VerticalAlignment="Center" />
+                        <TextBlock Text="MariaDB Ayarlar&#305;" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center" />
+                        <Button DockPanel.Dock="Right" HorizontalAlignment="Right"
+                                Command="{Binding SaveMariaDbSettingsCommand}" Cursor="Hand"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                                Background="Transparent" BorderThickness="0" Padding="0">
+                            <TextBlock Text="Kaydet" FontSize="11.5" FontWeight="Medium"
+                                       Foreground="{StaticResource PrimaryBrush}" />
+                        </Button>
+                    </DockPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="innodb_buffer_pool_size" FontSize="10"
+                                       Foreground="{StaticResource MutedTextBrush}" Margin="2,0,0,3" />
+                            <Grid>
+                                <TextBox Text="{Binding MariaDbInnodbBufferPoolSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource InputTextBoxStyle}" FontSize="11.5"
+                                         Padding="8,5,26,5" BorderThickness="0" />
+                                <materialDesign:PackIcon Kind="InformationOutline" Width="12" Height="12"
+                                                         Foreground="{StaticResource MutedTextBrush}" Cursor="Help"
+                                                         HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,7,0"
+                                                         ToolTip="InnoDB i&#231;in ayr&#305;lan bellek havuz boyutu." />
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="max_connections" FontSize="10"
+                                       Foreground="{StaticResource MutedTextBrush}" Margin="2,0,0,3" />
+                            <Grid>
+                                <TextBox Text="{Binding MariaDbMaxConnections, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource InputTextBoxStyle}" FontSize="11.5"
+                                         Padding="8,5,26,5" BorderThickness="0" />
+                                <materialDesign:PackIcon Kind="InformationOutline" Width="12" Height="12"
+                                                         Foreground="{StaticResource MutedTextBrush}" Cursor="Help"
+                                                         HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,7,0"
+                                                         ToolTip="Maksimum e&#351; zamanl&#305; ba&#287;lant&#305; say&#305;s&#305;." />
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="max_allowed_packet" FontSize="10"
+                                       Foreground="{StaticResource MutedTextBrush}" Margin="2,0,0,3" />
+                            <Grid>
+                                <TextBox Text="{Binding MariaDbMaxAllowedPacket, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource InputTextBoxStyle}" FontSize="11.5"
+                                         Padding="8,5,26,5" BorderThickness="0" />
+                                <materialDesign:PackIcon Kind="InformationOutline" Width="12" Height="12"
+                                                         Foreground="{StaticResource MutedTextBrush}" Cursor="Help"
+                                                         HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,7,0"
+                                                         ToolTip="Tek pakette g&#246;nderilebilecek maksimum veri boyutu." />
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Quick Fixes -->
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,12">
+                        <materialDesign:PackIcon Kind="AutoFix" Width="16" Height="16"
+                                                 Foreground="#16A34A" Margin="0,0,8,0"
+                                                 VerticalAlignment="Center" />
+                        <TextBlock Text="H&#305;zl&#305; D&#252;zeltmeler" Style="{StaticResource SectionHeaderStyle}" Margin="0" VerticalAlignment="Center" />
+                        <Button Style="{StaticResource GhostButtonStyle}" Command="{Binding ScanForIssuesCommand}"
+                                DockPanel.Dock="Right" HorizontalAlignment="Right" Padding="10,4" FontSize="11.5">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Magnify" Width="14" Height="14" Margin="0,0,5,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Tara" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </DockPanel>
+                    <ItemsControl ItemsSource="{Binding DetectedIssues}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource InputBackgroundBrush}" CornerRadius="6"
+                                        Padding="10,8" Margin="0,2">
+                                    <DockPanel>
+                                        <Button Style="{StaticResource SuccessButtonStyle}" DockPanel.Dock="Right"
+                                                Padding="10,4" FontSize="11" Margin="8,0,0,0"
+                                                Command="{Binding DataContext.ApplyQuickFixCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}">
+                                            <TextBlock Text="D&#252;zelt" />
+                                        </Button>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Title}" Foreground="{StaticResource PrimaryTextBrush}"
+                                                       FontWeight="Medium" FontSize="12" />
+                                            <TextBlock Text="{Binding Description}" Foreground="{StaticResource SecondaryTextBrush}"
+                                                       FontSize="10.5" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

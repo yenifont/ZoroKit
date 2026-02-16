@@ -1,0 +1,14 @@
+<UserControl x:Class="ZaraGON.UI.Controls.StatusIndicator"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:ZaraGON.UI.Converters">
+
+    <UserControl.Resources>
+        <converters:ServiceStatusToColorConverter x:Key="StatusColorConverter" />
+    </UserControl.Resources>
+
+    <StackPanel Orientation="Horizontal">
+        <Ellipse x:Name="StatusDot" Width="10" Height="10" Margin="0,0,6,0" />
+        <TextBlock x:Name="StatusLabel" Foreground="{StaticResource PrimaryTextBrush}" FontSize="13" />
+    </StackPanel>
+</UserControl>

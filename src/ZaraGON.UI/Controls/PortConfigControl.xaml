@@ -1,0 +1,10 @@
+<UserControl x:Class="ZaraGON.UI.Controls.PortConfigControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <DockPanel>
+        <TextBlock Text="Port:" Foreground="{StaticResource PrimaryTextBrush}"
+                   VerticalAlignment="Center" Margin="0,0,8,0" FontSize="13" />
+        <TextBox x:Name="PortInput" Style="{StaticResource InputTextBoxStyle}" Width="80" />
+    </DockPanel>
+</UserControl>

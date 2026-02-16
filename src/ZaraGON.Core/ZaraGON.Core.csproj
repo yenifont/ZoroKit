@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>ZaraGON.Core</RootNamespace>
+    <AssemblyName>ZaraGON.Core</AssemblyName>
+  </PropertyGroup>
+</Project>

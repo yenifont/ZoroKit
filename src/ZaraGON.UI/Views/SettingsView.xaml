@@ -1,0 +1,173 @@
+<UserControl x:Class="ZaraGON.UI.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
+        <StackPanel Margin="24,20,24,24">
+            <!-- Page Header -->
+            <DockPanel Margin="0,0,0,0">
+                <StackPanel>
+                    <TextBlock Text="Ayarlar" Style="{StaticResource PageTitleStyle}" />
+                    <TextBlock Text="Geli&#351;tirme ortam&#305;n&#305;z&#305; yap&#305;land&#305;r&#305;n" Style="{StaticResource PageSubtitleStyle}" />
+                </StackPanel>
+                <Button DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Top"
+                        Command="{Binding SaveCommand}"
+                        Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" Margin="0,6,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentSave" Width="13" Height="13" Margin="0,0,5,0"
+                                                 Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="Kaydet" FontSize="12" FontWeight="Medium"
+                                   Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </DockPanel>
+
+            <!-- Port Configuration -->
+            <Border Style="{StaticResource CardStyle}" Padding="14,12">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <materialDesign:PackIcon Kind="Ethernet" Width="15" Height="15"
+                                                 Foreground="{StaticResource PrimaryBrush}" Margin="0,0,8,0"
+                                                 VerticalAlignment="Center" />
+                        <TextBlock Text="Port Yap&#305;land&#305;rmas&#305;" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Apache Port -->
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Apache Port" Foreground="{StaticResource MutedTextBrush}" FontSize="10" Margin="0,0,0,4" />
+                            <TextBox Text="{Binding ApachePort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource InputTextBoxStyle}" FontSize="11.5"
+                                     Padding="8,5" BorderThickness="0" />
+                        </StackPanel>
+
+                        <!-- Apache SSL Port -->
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Apache SSL Port" Foreground="{StaticResource MutedTextBrush}" FontSize="10" Margin="0,0,0,4" />
+                            <TextBox Text="{Binding ApacheSslPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource InputTextBoxStyle}" FontSize="11.5"
+                                     Padding="8,5" BorderThickness="0" />
+                        </StackPanel>
+
+                        <!-- MySQL Port -->
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="MySQL Port" Foreground="{StaticResource MutedTextBrush}" FontSize="10" Margin="0,0,0,4" />
+                            <TextBox Text="{Binding MysqlPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource InputTextBoxStyle}" FontSize="11.5"
+                                     Padding="8,5" BorderThickness="0" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Paths -->
+            <Border Style="{StaticResource CardStyle}" Padding="14,12">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <materialDesign:PackIcon Kind="FolderOpen" Width="15" Height="15"
+                                                 Foreground="{StaticResource PrimaryBrush}" Margin="0,0,8,0"
+                                                 VerticalAlignment="Center" />
+                        <TextBlock Text="Dizinler" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <TextBlock Text="Belge K&#246;k&#252; (Document Root)" Foreground="{StaticResource MutedTextBrush}" FontSize="10" Margin="0,0,0,4" />
+                    <TextBox Text="{Binding DocumentRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource InputTextBoxStyle}" FontSize="11.5"
+                             Padding="8,5" BorderThickness="0" />
+                </StackPanel>
+            </Border>
+
+            <!-- Behavior -->
+            <Border Style="{StaticResource CardStyle}" Padding="14,12">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <materialDesign:PackIcon Kind="CogOutline" Width="15" Height="15"
+                                                 Foreground="{StaticResource PrimaryBrush}" Margin="0,0,8,0"
+                                                 VerticalAlignment="Center" />
+                        <TextBlock Text="Davran&#305;&#351;" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <StackPanel>
+                        <CheckBox Content="Ba&#351;lang&#305;&#231;ta Apache'yi otomatik ba&#351;lat"
+                                  IsChecked="{Binding AutoStartApache, Mode=TwoWay}"
+                                  Foreground="{StaticResource PrimaryTextBrush}" FontSize="11.5" Margin="0,3" />
+                        <CheckBox Content="Ba&#351;lang&#305;&#231;ta MariaDB'yi otomatik ba&#351;lat"
+                                  IsChecked="{Binding AutoStartMariaDb, Mode=TwoWay}"
+                                  Foreground="{StaticResource PrimaryTextBrush}" FontSize="11.5" Margin="0,3" />
+                        <CheckBox Content="Windows ba&#351;lang&#305;c&#305;nda otomatik &#231;al&#305;&#351;t&#305;r"
+                                  IsChecked="{Binding RunOnWindowsStartup, Mode=TwoWay}"
+                                  Foreground="{StaticResource PrimaryTextBrush}" FontSize="11.5" Margin="0,3" />
+                        <CheckBox Content="PHP, MariaDB ve Composer'&#305; sistem PATH'ine ekle"
+                                  IsChecked="{Binding AddToSystemPath, Mode=TwoWay}"
+                                  Foreground="{StaticResource PrimaryTextBrush}" FontSize="11.5" Margin="0,3" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Auto Virtual Hosts -->
+            <Border Style="{StaticResource CardStyle}" Padding="14,12">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <materialDesign:PackIcon Kind="Web" Width="15" Height="15"
+                                                 Foreground="{StaticResource PrimaryBrush}" Margin="0,0,8,0"
+                                                 VerticalAlignment="Center" />
+                        <TextBlock Text="Otomatik Sanal Sunucu" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <TextBlock Text="Belge k&#246;k&#252;ndeki her klas&#246;r i&#231;in otomatik .test alan&#305; olu&#351;turur."
+                               Foreground="{StaticResource MutedTextBrush}" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap" />
+                    <CheckBox Content="Otomatik Sanal Sunucuyu Etkinle&#351;tir"
+                              IsChecked="{Binding AutoVirtualHosts, Mode=TwoWay}"
+                              Foreground="{StaticResource PrimaryTextBrush}" FontSize="11.5" Margin="0,3" />
+                    <DockPanel Margin="0,8,0,0">
+                        <TextBlock Text="TLD Son Eki" Foreground="{StaticResource MutedTextBrush}"
+                                   FontSize="10" VerticalAlignment="Center" Margin="0,0,10,0" />
+                        <TextBox Text="{Binding VirtualHostTld, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource InputTextBoxStyle}" FontSize="11.5"
+                                 Padding="8,5" BorderThickness="0" Width="100" HorizontalAlignment="Left" />
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- SSL / HTTPS -->
+            <Border Style="{StaticResource CardStyle}" Padding="14,12">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <materialDesign:PackIcon Kind="Lock" Width="15" Height="15"
+                                                 Foreground="{StaticResource SuccessBrush}" Margin="0,0,8,0"
+                                                 VerticalAlignment="Center" />
+                        <TextBlock Text="SSL / HTTPS" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <TextBlock Text="Yerel HTTPS geli&#351;tirme i&#231;in SSL sertifikas&#305; olu&#351;turur. Sisteminiz taraf&#305;ndan g&#252;venilen yerel bir CA olu&#351;turur."
+                               Foreground="{StaticResource MutedTextBrush}" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap" />
+                    <CheckBox Content="Yerel SSL'yi Etkinle&#351;tir"
+                              IsChecked="{Binding SslEnabled, Mode=TwoWay}"
+                              Foreground="{StaticResource PrimaryTextBrush}" FontSize="11.5" Margin="0,3" />
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                        <Button Content="Sertifika Olu&#351;tur" Style="{StaticResource SuccessButtonStyle}"
+                                Command="{Binding GenerateSslCertificateCommand}"
+                                Padding="12,5" FontSize="11.5" Margin="0,0,8,0" />
+                        <Button Content="Trust Store'a Ekle" Style="{StaticResource GhostButtonStyle}"
+                                Command="{Binding TrustSslCertificateCommand}"
+                                Padding="12,5" FontSize="11.5"
+                                Visibility="{Binding HasSslCertificate, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Status Message -->
+            <TextBlock Text="{Binding StatusMessage}" Foreground="{StaticResource MutedTextBrush}"
+                       Margin="2,2,0,0" FontSize="11.5" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
