@@ -12,6 +12,8 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
 
@@ -30,6 +32,7 @@ jobs:
             -o publish
 
       - name: Upload build artifact
+        id: upload
         uses: actions/upload-artifact@v4
         with:
           name: ZaraGON
@@ -51,7 +54,7 @@ jobs:
           project-slug: 'ZaraGON'
           signing-policy-slug: 'ZaraGON-Release-Policy'
           artifact-configuration-slug: 'initial-version'
-          github-artifact-id: ZaraGON
+          github-artifact-id: ${{ needs.build.outputs.artifact-id }}
           wait-for-completion: true
           output-artifact-directory: ./signed
 
