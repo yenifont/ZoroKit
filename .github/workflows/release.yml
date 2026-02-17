@@ -7,13 +7,10 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 jobs:
-  build:
+  build-and-release:
     runs-on: windows-latest
-    outputs:
-      artifact-id: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
 
@@ -31,35 +28,8 @@ jobs:
             -p:IncludeNativeLibrariesForSelfExtract=true `
             -o publish
 
-      - name: Upload build artifact
-        id: upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: ZaraGON
-          path: publish/ZaraGON.exe
-
-  sign-and-release:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      id-token: write
-      actions: read
-    steps:
-      - name: Sign with SignPath
-        uses: signpath/github-action-submit-signing-request@v1
-        with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
-          project-slug: 'ZaraGON'
-          signing-policy-slug: 'ZaraGON-Release-Policy'
-          artifact-configuration-slug: 'initial-version'
-          github-artifact-id: ${{ needs.build.outputs.artifact-id }}
-          wait-for-completion: true
-          output-artifact-directory: ./signed
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ./signed/ZaraGON.exe
+          files: publish/ZaraGON.exe
           generate_release_notes: true
