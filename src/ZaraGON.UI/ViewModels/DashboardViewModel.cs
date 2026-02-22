@@ -67,7 +67,7 @@ public sealed partial class DashboardViewModel : ObservableObject
     private string _activeMariaDbVersion = "Yüklü değil";
 
     [ObservableProperty]
-    private int _apachePort = 8080;
+    private int _apachePort = 80;
 
     [ObservableProperty]
     private int _mysqlPort = 3306;

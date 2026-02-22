@@ -149,6 +149,65 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
         }
     }
 
+    public async Task EnsureVHostForHostnameAsync(string hostname, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(hostname)) return;
+
+        var config = await _configManager.LoadAsync(ct);
+        var wwwPath = Path.Combine(_basePath, config.DocumentRoot);
+        _fileSystem.CreateDirectory(wwwPath);
+
+        var tld = config.VirtualHostTld;
+        var siteName = hostname.EndsWith(tld, StringComparison.OrdinalIgnoreCase)
+            ? hostname[..^tld.Length]
+            : hostname.Split('.')[0];
+        if (string.IsNullOrEmpty(siteName)) siteName = hostname.Replace(".", "_");
+
+        var siteDir = Path.Combine(wwwPath, siteName);
+        if (!_fileSystem.DirectoryExists(siteDir))
+            _fileSystem.CreateDirectory(siteDir);
+
+        if (config.AutoVirtualHosts)
+        {
+            await ScanAndApplyAsync(ct);
+            return;
+        }
+
+        var sitesDir = Path.Combine(_basePath, Defaults.SitesEnabledDir);
+        _fileSystem.CreateDirectory(sitesDir);
+        var docRoot = siteDir.Replace('\\', '/');
+        var vhostConf = GenerateVHostConf(hostname, docRoot, config.ApachePort);
+        var confPath = Path.Combine(sitesDir, $"manual.{hostname}.conf");
+        await _fileSystem.WriteAllTextAsync(confPath, vhostConf, ct);
+    }
+
+    public async Task EnsureDefaultZaragonHostAsync(CancellationToken ct = default)
+    {
+        var hostname = Defaults.DefaultZaragonHostname;
+        var config = await _configManager.LoadAsync(ct);
+        var existing = await _hostsManager.GetManagedEntriesAsync(ct);
+        if (existing.All(e => !string.Equals(e.Hostname, hostname, StringComparison.OrdinalIgnoreCase)))
+        {
+            try
+            {
+                await _hostsManager.AddEntryAsync(new HostEntry { IpAddress = "127.0.0.1", Hostname = hostname }, ct);
+            }
+            catch
+            {
+                /* hosts yazma yükseltme gerektirebilir; vhost yine eklenir */
+            }
+        }
+
+        var wwwPath = Path.Combine(_basePath, config.DocumentRoot);
+        _fileSystem.CreateDirectory(wwwPath);
+        var sitesDir = Path.Combine(_basePath, Defaults.SitesEnabledDir);
+        _fileSystem.CreateDirectory(sitesDir);
+        var docRoot = wwwPath.Replace('\\', '/');
+        var vhostConf = GenerateVHostConf(hostname, docRoot, config.ApachePort);
+        var confPath = Path.Combine(sitesDir, $"default.{hostname}.conf");
+        await _fileSystem.WriteAllTextAsync(confPath, vhostConf, ct);
+    }
+
     public async Task StartWatchingAsync(CancellationToken ct = default)
     {
         var config = await _configManager.LoadAsync(ct);

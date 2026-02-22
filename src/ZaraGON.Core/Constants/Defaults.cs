@@ -2,8 +2,8 @@ namespace ZaraGON.Core.Constants;
 
 public static class Defaults
 {
-    public const int ApachePort = 8080;
-    public const int ApacheSslPort = 8443;
+    public const int ApachePort = 80;
+    public const int ApacheSslPort = 443;
     public const int MySqlPort = 3306;
     public const string DocumentRoot = "www";
     public const string ConfigDir = "config";
@@ -19,6 +19,8 @@ public static class Defaults
     public const string AppsDir = "apps";
     public const string ComposerDir = "bin/composer";
     public const string VirtualHostTld = ".test";
+    /// <summary>İlk kurulumda otomatik eklenecek varsayılan hostname (ana www'ü açar).</summary>
+    public const string DefaultZaragonHostname = "zaragon.test";
     public const string MainConfigFile = "config/zoragon.json";
     public const string VersionsFile = "config/versions.json";
     public const string DefaultPhpInfo = "<?php phpinfo(); ?>"; // Legacy fallback
@@ -36,7 +38,7 @@ public static class Defaults
     public const string VcRedistFileName = "vc_redist.x64.exe";
 
     // App update (GitHub)
-    public const string AppVersion = "1.0.3";
+    public const string AppVersion = "1.0.4";
     public const string GitHubOwner = "yenifont";
     public const string GitHubRepo = "ZaraGON";
     public const string GitHubReleasesApi = $"https://api.github.com/repos/{GitHubOwner}/{GitHubRepo}/releases/latest";

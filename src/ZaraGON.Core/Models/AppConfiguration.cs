@@ -2,8 +2,8 @@ namespace ZaraGON.Core.Models;
 
 public sealed class AppConfiguration
 {
-    public int ApachePort { get; set; } = 8080;
-    public int ApacheSslPort { get; set; } = 8443;
+    public int ApachePort { get; set; } = 80;
+    public int ApacheSslPort { get; set; } = 443;
     public int MySqlPort { get; set; } = 3306;
     public string DocumentRoot { get; set; } = "www";
     public string ActiveApacheVersion { get; set; } = string.Empty;

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ZaraGON.Core.Enums;
 using ZaraGON.Core.Interfaces.Services;
 using ZaraGON.Core.Models;
 using ZaraGON.UI.Services;
@@ -10,6 +11,8 @@ namespace ZaraGON.UI.ViewModels;
 public sealed partial class HostsFileViewModel : ObservableObject
 {
     private readonly IHostsFileManager _hostsFileManager;
+    private readonly IAutoVirtualHostManager _autoVHostManager;
+    private readonly IServiceController _apacheController;
     private readonly DialogService _dialogService;
 
     [ObservableProperty]
@@ -26,9 +29,15 @@ public sealed partial class HostsFileViewModel : ObservableObject
 
     public ObservableCollection<HostEntry> Entries { get; } = [];
 
-    public HostsFileViewModel(IHostsFileManager hostsFileManager, DialogService dialogService)
+    public HostsFileViewModel(
+        IHostsFileManager hostsFileManager,
+        IAutoVirtualHostManager autoVHostManager,
+        IServiceController apacheController,
+        DialogService dialogService)
     {
         _hostsFileManager = hostsFileManager;
+        _autoVHostManager = autoVHostManager;
+        _apacheController = apacheController;
         _dialogService = dialogService;
         _ = LoadAsync();
     }
@@ -67,8 +76,21 @@ public sealed partial class HostsFileViewModel : ObservableObject
             };
 
             await _hostsFileManager.AddEntryAsync(entry);
+
+            try
+            {
+                await _autoVHostManager.EnsureVHostForHostnameAsync(entry.Hostname);
+                var status = await _apacheController.GetStatusAsync();
+                if (status == ServiceStatus.Running)
+                    await _apacheController.ReloadAsync();
+            }
+            catch
+            {
+                /* vhost/reload best-effort; hosts kaydı zaten eklendi */
+            }
+
             NewHostname = string.Empty;
-            StatusMessage = $"{entry.Hostname} eklendi";
+            StatusMessage = $"{entry.Hostname} eklendi — tarayıcıda açılabilir";
             await LoadAsync();
         }
         catch (Exception ex)

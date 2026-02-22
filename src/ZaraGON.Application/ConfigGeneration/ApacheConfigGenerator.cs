@@ -12,7 +12,7 @@ public sealed class ApacheConfigGenerator
         string vhostsConfPath,
         string? sitesEnabledDir = null,
         bool sslEnabled = false,
-        int sslPort = 8443,
+        int sslPort = 443,
         string? sslDir = null,
         string? aliasDir = null)
     {

@@ -19,10 +19,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly string _basePath;
 
     [ObservableProperty]
-    private int _apachePort = 8080;
+    private int _apachePort = 80;
 
     [ObservableProperty]
-    private int _apacheSslPort = 8443;
+    private int _apacheSslPort = 443;
 
     [ObservableProperty]
     private int _mysqlPort = 3306;

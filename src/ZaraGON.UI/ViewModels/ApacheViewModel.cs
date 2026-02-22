@@ -30,7 +30,7 @@ public sealed partial class ApacheViewModel : ObservableObject
     private string _activeVersion = "None";
 
     [ObservableProperty]
-    private int _port = 8080;
+    private int _port = 80;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanStart))]
