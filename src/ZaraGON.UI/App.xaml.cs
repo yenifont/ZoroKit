@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using SD = System.Drawing;
 using SWF = System.Windows.Forms;
 using ZaraGON.Application.ConfigGeneration;
@@ -157,16 +158,12 @@ public partial class App : System.Windows.Application
     {
         try
         {
-            var httpClient = _serviceProvider!.GetRequiredService<HttpClient>();
+            var factory = _serviceProvider!.GetRequiredService<IHttpClientFactory>();
+            var httpClient = factory.CreateClient("GitHub");
             var toastService = _serviceProvider!.GetRequiredService<ToastService>();
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-
             var request = new HttpRequestMessage(HttpMethod.Get, Defaults.GitHubReleasesApi);
-            request.Headers.TryAddWithoutValidation("User-Agent", "ZaraGON/1.0 (Windows; https://github.com/yenifont/ZaraGON)");
-            request.Headers.Add("Accept", "application/vnd.github+json");
-            request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
-
             var response = await httpClient.SendAsync(request, cts.Token);
             if (!response.IsSuccessStatusCode) return;
 
@@ -606,7 +603,7 @@ public partial class App : System.Windows.Application
             return pm;
         });
 
-        // HttpClient
+        // HttpClient (genel: indirme, sürüm sağlayıcılar)
         services.AddHttpClient();
         services.AddSingleton(sp =>
         {
@@ -615,6 +612,15 @@ public partial class App : System.Windows.Application
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) ZaraGON/1.0");
             client.Timeout = TimeSpan.FromSeconds(30);
             return client;
+        });
+
+        // GitHub API için ayrı client — tek User-Agent (çift header 403 sebebi olabiliyor)
+        services.AddHttpClient("GitHub", client =>
+        {
+            client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "ZaraGON/1.0 (Windows; https://github.com/yenifont/ZaraGON)");
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/vnd.github+json");
+            client.DefaultRequestHeaders.TryAddWithoutValidation("X-GitHub-Api-Version", "2022-11-28");
+            client.Timeout = TimeSpan.FromSeconds(20);
         });
 
         // Configuration
@@ -793,7 +799,7 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<IDownloadManager>(),
                 sp.GetRequiredService<IFileSystem>(),
                 sp.GetRequiredService<DialogService>(),
-                sp.GetRequiredService<HttpClient>(),
+                sp.GetRequiredService<IHttpClientFactory>(),
                 basePath));
 
         // Main ViewModel

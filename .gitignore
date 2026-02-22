@@ -22,8 +22,9 @@
 *.user
 *.suo
 
-# Installer (local only)
-/installer/
+# Installer: script ve kaynaklar takip edilir; cikti ve indirilen exe ignore
+/installer/Output/
+/installer/deps/
 
 # Local build script
 build.ps1

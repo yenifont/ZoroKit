@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using Microsoft.Extensions.Http;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -58,7 +59,7 @@ public sealed partial class UpdatesViewModel : ObservableObject
     private readonly IDownloadManager _downloadManager;
     private readonly IFileSystem _fileSystem;
     private readonly DialogService _dialogService;
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly string _basePath;
 
     private string _appDownloadUrl = string.Empty;
@@ -80,7 +81,7 @@ public sealed partial class UpdatesViewModel : ObservableObject
         IDownloadManager downloadManager,
         IFileSystem fileSystem,
         DialogService dialogService,
-        HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         string basePath)
     {
         _versionManager = versionManager;
@@ -91,7 +92,7 @@ public sealed partial class UpdatesViewModel : ObservableObject
         _downloadManager = downloadManager;
         _fileSystem = fileSystem;
         _dialogService = dialogService;
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _basePath = basePath;
 
         _ = LoadAsync();
@@ -255,12 +256,9 @@ public sealed partial class UpdatesViewModel : ObservableObject
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+            var githubClient = _httpClientFactory.CreateClient("GitHub");
             var request = new HttpRequestMessage(HttpMethod.Get, Defaults.GitHubReleasesApi);
-            request.Headers.TryAddWithoutValidation("User-Agent", "ZaraGON/1.0 (Windows; https://github.com/yenifont/ZaraGON)");
-            request.Headers.Add("Accept", "application/vnd.github+json");
-            request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
-
-            var response = await _httpClient.SendAsync(request, cts.Token);
+            var response = await githubClient.SendAsync(request, cts.Token);
             if (!response.IsSuccessStatusCode)
             {
                 component.UpdateStatus = $"GitHub'a erişilemedi (HTTP {(int)response.StatusCode}). İnternet veya güvenlik duvarını kontrol edin.";
