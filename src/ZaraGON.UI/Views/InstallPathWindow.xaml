@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="ZaraGON - Kurulum Dizini"
-        Height="420" Width="520"
+        Height="520" Width="540"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None"
@@ -41,6 +41,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
@@ -139,10 +140,15 @@
 
                 <!-- Separator -->
                 <Border Grid.Row="5" Height="1" Background="{StaticResource BorderBrush}"
-                        Margin="0,12,0,16" Opacity="0.5" />
+                        Margin="0,12,0,8" Opacity="0.5" />
 
-                <!-- Buttons -->
-                <Grid Grid.Row="6">
+                <!-- Hint: sonraki adım -->
+                <TextBlock Grid.Row="6" Text="İleri'ye tıklayın — ardından Apache, PHP ve MariaDB indirilecek."
+                           FontSize="11" Foreground="{StaticResource MutedTextBrush}"
+                           HorizontalAlignment="Center" Margin="0,0,0,14" />
+
+                <!-- Buttons (XAMPP tarzi: Ileri / Iptal) -->
+                <Grid Grid.Row="7">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -152,16 +158,16 @@
                     <Button x:Name="CancelButton" Grid.Column="1"
                             Content="İptal" Click="CancelButton_Click"
                             Style="{StaticResource GhostButtonStyle}"
-                            Padding="24,10" Margin="0,0,10,0" FontSize="13" />
+                            Padding="28,12" Margin="0,0,12,0" FontSize="14" />
 
                     <Button x:Name="StartButton" Grid.Column="2"
                             Click="StartButton_Click"
                             Style="{StaticResource SuccessButtonStyle}"
-                            Padding="24,10" FontSize="13">
+                            Padding="28,12" FontSize="14" FontWeight="SemiBold">
                         <StackPanel Orientation="Horizontal">
-                            <md:PackIcon Kind="Download" Width="16" Height="16"
-                                         VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="Kuruluma Başla" VerticalAlignment="Center" />
+                            <md:PackIcon Kind="ArrowRight" Width="18" Height="18"
+                                         VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="İleri" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                 </Grid>
