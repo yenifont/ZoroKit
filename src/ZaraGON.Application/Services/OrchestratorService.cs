@@ -4,6 +4,7 @@ using ZaraGON.Core.Constants;
 using ZaraGON.Core.Enums;
 using ZaraGON.Core.Interfaces.Infrastructure;
 using ZaraGON.Core.Interfaces.Services;
+using ZaraGON.Core.Models;
 
 namespace ZaraGON.Application.Services;
 
@@ -18,6 +19,7 @@ public sealed class OrchestratorService
     private readonly IFileSystem _fileSystem;
     private readonly PhpService _phpService;
     private readonly IAutoVirtualHostManager _autoVHostManager;
+    private readonly IPortManager _portManager;
     private readonly HttpClient _httpClient;
     private readonly string _basePath;
 
@@ -31,6 +33,7 @@ public sealed class OrchestratorService
         IFileSystem fileSystem,
         PhpService phpService,
         IAutoVirtualHostManager autoVHostManager,
+        IPortManager portManager,
         HttpClient httpClient,
         string basePath)
     {
@@ -43,6 +46,7 @@ public sealed class OrchestratorService
         _fileSystem = fileSystem;
         _phpService = phpService;
         _autoVHostManager = autoVHostManager;
+        _portManager = portManager;
         _httpClient = httpClient;
         _basePath = basePath;
     }
@@ -73,8 +77,9 @@ public sealed class OrchestratorService
         if (!_fileSystem.FileExists(indexPath))
             await _fileSystem.WriteAllTextAsync(indexPath, Defaults.DefaultIndexPhp, ct);
 
-        // Load/create config
-        await _configManager.LoadAsync(ct);
+        // Load/create config and resolve port conflicts
+        var config = await _configManager.LoadAsync(ct);
+        await ResolvePortConflictsAsync(config, ct);
 
         // Create SSL and sites-enabled dirs
         _fileSystem.CreateDirectory(Path.Combine(_basePath, Defaults.SitesEnabledDir));
@@ -399,5 +404,43 @@ public sealed class OrchestratorService
         await _mariaDbController.StopAsync();
         await _apacheController.StopAsync();
         await _logWatcher.StopAllAsync();
+    }
+
+    private async Task ResolvePortConflictsAsync(AppConfiguration config, CancellationToken ct)
+    {
+        var changed = false;
+
+        if (!await _portManager.IsPortAvailableAsync(config.ApachePort, ct))
+        {
+            var freePort = await _portManager.FindAvailablePortAsync(config.ApachePort + 1, config.ApachePort + 100, ct);
+            if (freePort.HasValue)
+            {
+                config.ApachePort = freePort.Value;
+                changed = true;
+            }
+        }
+
+        if (!await _portManager.IsPortAvailableAsync(config.ApacheSslPort, ct))
+        {
+            var freePort = await _portManager.FindAvailablePortAsync(config.ApacheSslPort + 1, config.ApacheSslPort + 100, ct);
+            if (freePort.HasValue)
+            {
+                config.ApacheSslPort = freePort.Value;
+                changed = true;
+            }
+        }
+
+        if (!await _portManager.IsPortAvailableAsync(config.MySqlPort, ct))
+        {
+            var freePort = await _portManager.FindAvailablePortAsync(config.MySqlPort + 1, config.MySqlPort + 100, ct);
+            if (freePort.HasValue)
+            {
+                config.MySqlPort = freePort.Value;
+                changed = true;
+            }
+        }
+
+        if (changed)
+            await _configManager.SaveAsync(config, ct);
     }
 }

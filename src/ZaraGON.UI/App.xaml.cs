@@ -73,10 +73,12 @@ public partial class App : System.Windows.Application
             return;
         }
 
-        var basePath = AppDomain.CurrentDomain.BaseDirectory;
-        // Walk up to find the solution root (where ZaraGON.sln exists)
-        var solutionRoot = FindSolutionRoot(basePath);
-        basePath = solutionRoot ?? basePath;
+        var basePath = ResolveBasePath();
+        if (basePath == null)
+        {
+            Shutdown();
+            return;
+        }
         _basePath = basePath;
 
         var services = new ServiceCollection();
@@ -728,6 +730,7 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<IFileSystem>(),
                 sp.GetRequiredService<PhpService>(),
                 sp.GetRequiredService<IAutoVirtualHostManager>(),
+                sp.GetRequiredService<IPortManager>(),
                 sp.GetRequiredService<HttpClient>(),
                 basePath));
 
@@ -746,6 +749,7 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<IConfigurationManager>(),
                 sp.GetRequiredService<IHealthChecker>(),
                 sp.GetRequiredService<IVcRedistChecker>(),
+                sp.GetRequiredService<IPortManager>(),
                 sp.GetRequiredService<DialogService>(),
                 sp.GetRequiredService<ToastService>(),
                 sp.GetRequiredService<HttpClient>(),
@@ -851,5 +855,61 @@ public partial class App : System.Windows.Application
             dir = dir.Parent;
         }
         return null;
+    }
+
+    private static readonly string InstallPathFile = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "ZaraGON", "installpath.txt");
+
+    /// <summary>
+    /// 1) Dev mode: walk up to ZaraGON.sln
+    /// 2) Saved install path from %LocalAppData%
+    /// 3) First run: show path picker dialog
+    /// </summary>
+    private string? ResolveBasePath()
+    {
+        var exeDir = AppDomain.CurrentDomain.BaseDirectory;
+        var solutionRoot = FindSolutionRoot(exeDir);
+        if (solutionRoot != null)
+            return solutionRoot;
+
+        var savedPath = LoadInstallPath();
+        if (savedPath != null && Directory.Exists(savedPath))
+            return savedPath;
+
+        var dialog = new Views.InstallPathWindow();
+        var result = dialog.ShowDialog();
+        if (result != true)
+            return null;
+
+        SaveInstallPath(dialog.SelectedPath);
+        return dialog.SelectedPath;
+    }
+
+    private static string? LoadInstallPath()
+    {
+        try
+        {
+            if (File.Exists(InstallPathFile))
+            {
+                var path = File.ReadAllText(InstallPathFile).Trim();
+                if (!string.IsNullOrEmpty(path))
+                    return path;
+            }
+        }
+        catch { }
+        return null;
+    }
+
+    private static void SaveInstallPath(string path)
+    {
+        try
+        {
+            var dir = Path.GetDirectoryName(InstallPathFile)!;
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            File.WriteAllText(InstallPathFile, path);
+        }
+        catch { }
     }
 }

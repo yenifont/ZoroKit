@@ -23,4 +23,7 @@ public sealed class PortManagerService : IPortManager
 
     public Task<bool> KillProcessOnPortAsync(int port, CancellationToken ct = default)
         => _inner.KillProcessOnPortAsync(port, ct);
+
+    public Task<int?> FindAvailablePortAsync(int startPort, int maxPort = 65535, CancellationToken ct = default)
+        => _inner.FindAvailablePortAsync(startPort, maxPort, ct);
 }

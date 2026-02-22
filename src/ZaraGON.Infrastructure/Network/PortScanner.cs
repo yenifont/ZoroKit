@@ -143,4 +143,14 @@ public sealed class PortScanner : IPortManager
         await _processManager.KillProcessAsync(conflict.ProcessId, ct);
         return true;
     }
+
+    public async Task<int?> FindAvailablePortAsync(int startPort, int maxPort = 65535, CancellationToken ct = default)
+    {
+        for (var port = startPort; port <= Math.Min(maxPort, 65535); port++)
+        {
+            if (await IsPortAvailableAsync(port, ct))
+                return port;
+        }
+        return null;
+    }
 }

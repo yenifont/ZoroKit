@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using ZaraGON.Application.Services;
 using ZaraGON.Core.Constants;
 using ZaraGON.Core.Enums;
+using ZaraGON.Core.Exceptions;
 using ZaraGON.Core.Interfaces.Infrastructure;
 using ZaraGON.Core.Interfaces.Services;
 using ZaraGON.Core.Models;
@@ -24,6 +25,7 @@ public sealed partial class DashboardViewModel : ObservableObject
     private readonly IConfigurationManager _configManager;
     private readonly IHealthChecker _healthChecker;
     private readonly IVcRedistChecker _vcRedistChecker;
+    private readonly IPortManager _portManager;
     private readonly DialogService _dialogService;
     private readonly ToastService _toastService;
     private readonly HttpClient _httpClient;
@@ -113,6 +115,7 @@ public sealed partial class DashboardViewModel : ObservableObject
         IConfigurationManager configManager,
         IHealthChecker healthChecker,
         IVcRedistChecker vcRedistChecker,
+        IPortManager portManager,
         DialogService dialogService,
         ToastService toastService,
         HttpClient httpClient,
@@ -125,6 +128,7 @@ public sealed partial class DashboardViewModel : ObservableObject
         _configManager = configManager;
         _healthChecker = healthChecker;
         _vcRedistChecker = vcRedistChecker;
+        _portManager = portManager;
         _dialogService = dialogService;
         _toastService = toastService;
         _httpClient = httpClient;
@@ -174,14 +178,34 @@ public sealed partial class DashboardViewModel : ObservableObject
                 return;
             }
 
-            await _apacheController.StartAsync();
+            try
+            {
+                await _apacheController.StartAsync();
+            }
+            catch (PortConflictException pcEx)
+            {
+                var oldPort = pcEx.Port;
+                var newPort = await _portManager.FindAvailablePortAsync(oldPort + 1, oldPort + 100);
+                if (newPort == null)
+                    throw new ServiceStartException("Apache", $"Port {oldPort} meşgul ve uygun boş port bulunamadı.");
+
+                var config = await _configManager.LoadAsync();
+                config.ApachePort = newPort.Value;
+                await _configManager.SaveAsync(config);
+                await _apacheController.RegenerateConfigAsync();
+
+                await _apacheController.StartAsync();
+                ApachePort = newPort.Value;
+                _toastService.ShowWarning($"Port {oldPort} meşgul olduğundan Apache port {newPort.Value}'de başlatıldı.");
+            }
+
             StatusMessage = "Apache başlatıldı";
-            _toastService.ShowSuccess("Apache ba\u015far\u0131yla ba\u015flat\u0131ld\u0131");
+            _toastService.ShowSuccess("Apache başarıyla başlatıldı");
         }
         catch (Exception ex)
         {
             StatusMessage = $"Hata: {ex.Message}";
-            _toastService.ShowError($"Apache ba\u015flat\u0131lamad\u0131: {ex.Message}");
+            _toastService.ShowError($"Apache başlatılamadı: {ex.Message}");
         }
         finally { IsBusy = false; }
     }
@@ -263,14 +287,34 @@ public sealed partial class DashboardViewModel : ObservableObject
                 return;
             }
 
-            await _mariaDbController.StartAsync();
+            try
+            {
+                await _mariaDbController.StartAsync();
+            }
+            catch (PortConflictException pcEx)
+            {
+                var oldPort = pcEx.Port;
+                var newPort = await _portManager.FindAvailablePortAsync(oldPort + 1, oldPort + 100);
+                if (newPort == null)
+                    throw new ServiceStartException("MariaDB", $"Port {oldPort} meşgul ve uygun boş port bulunamadı.");
+
+                var config = await _configManager.LoadAsync();
+                config.MySqlPort = newPort.Value;
+                await _configManager.SaveAsync(config);
+                await _mariaDbController.RegenerateConfigAsync();
+
+                await _mariaDbController.StartAsync();
+                MysqlPort = newPort.Value;
+                _toastService.ShowWarning($"Port {oldPort} meşgul olduğundan MariaDB port {newPort.Value}'de başlatıldı.");
+            }
+
             StatusMessage = "MariaDB başlatıldı";
-            _toastService.ShowSuccess("MariaDB ba\u015far\u0131yla ba\u015flat\u0131ld\u0131");
+            _toastService.ShowSuccess("MariaDB başarıyla başlatıldı");
         }
         catch (Exception ex)
         {
             StatusMessage = $"Hata: {ex.Message}";
-            _toastService.ShowError($"MariaDB ba\u015flat\u0131lamad\u0131: {ex.Message}");
+            _toastService.ShowError($"MariaDB başlatılamadı: {ex.Message}");
         }
         finally { IsBusy = false; }
     }
