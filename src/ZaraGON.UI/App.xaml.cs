@@ -160,11 +160,12 @@ public partial class App : System.Windows.Application
             var httpClient = _serviceProvider!.GetRequiredService<HttpClient>();
             var toastService = _serviceProvider!.GetRequiredService<ToastService>();
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
             var request = new HttpRequestMessage(HttpMethod.Get, Defaults.GitHubReleasesApi);
-            request.Headers.Add("User-Agent", "ZaraGON");
+            request.Headers.TryAddWithoutValidation("User-Agent", "ZaraGON/1.0 (Windows; https://github.com/yenifont/ZaraGON)");
             request.Headers.Add("Accept", "application/vnd.github+json");
+            request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
 
             var response = await httpClient.SendAsync(request, cts.Token);
             if (!response.IsSuccessStatusCode) return;

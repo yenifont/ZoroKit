@@ -254,15 +254,16 @@ public sealed partial class UpdatesViewModel : ObservableObject
         component.UpdateStatus = "GitHub kontrol ediliyor...";
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
             var request = new HttpRequestMessage(HttpMethod.Get, Defaults.GitHubReleasesApi);
-            request.Headers.Add("User-Agent", "ZaraGON");
+            request.Headers.TryAddWithoutValidation("User-Agent", "ZaraGON/1.0 (Windows; https://github.com/yenifont/ZaraGON)");
             request.Headers.Add("Accept", "application/vnd.github+json");
+            request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
 
             var response = await _httpClient.SendAsync(request, cts.Token);
             if (!response.IsSuccessStatusCode)
             {
-                component.UpdateStatus = "GitHub'a erişilemedi";
+                component.UpdateStatus = $"GitHub'a erişilemedi (HTTP {(int)response.StatusCode}). İnternet veya güvenlik duvarını kontrol edin.";
                 component.IsChecked = true;
                 return;
             }
@@ -300,7 +301,7 @@ public sealed partial class UpdatesViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            component.UpdateStatus = $"Hata: {ex.Message}";
+            component.UpdateStatus = $"Bağlantı hatası: {ex.Message}";
         }
         finally { component.IsChecking = false; }
     }

@@ -7,10 +7,15 @@
         ResizeMode="NoResize"
         WindowStyle="None"
         AllowsTransparency="True"
-        Background="Transparent">
+        Background="Transparent"
+        UseLayoutRounding="True">
 
     <Border Background="{StaticResource CardBackgroundBrush}" CornerRadius="16"
-            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+            SnapsToDevicePixels="True">
+        <Border.Clip>
+            <RectangleGeometry RadiusX="16" RadiusY="16" Rect="0,0,560,520" />
+        </Border.Clip>
         <Border.Effect>
             <DropShadowEffect BlurRadius="30" ShadowDepth="3" Opacity="0.18" Color="#000000" />
         </Border.Effect>
