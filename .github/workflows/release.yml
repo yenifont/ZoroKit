@@ -28,8 +28,29 @@ jobs:
             -p:IncludeNativeLibrariesForSelfExtract=true `
             -o publish
 
+      - name: Build installer (Inno Setup)
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: installer/ZaraGON.iss
+          options: /O+
+
+      - name: Get installer path
+        id: installer
+        run: |
+          $f = Get-ChildItem -Path installer/Output/ZaraGON-Setup-*.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $f) { Write-Error "Kurulum paketi bulunamadi: installer/Output/ZaraGON-Setup-*.exe"; exit 1 }
+          echo "path=$($f.FullName)" >> $env:GITHUB_OUTPUT
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: publish/ZaraGON.exe
+          files: |
+            ${{ steps.installer.outputs.path }}
+            publish/ZaraGON.exe
           generate_release_notes: true
+          body: |
+            **Kurulum (onemli):** `ZaraGON-Setup-*.exe` dosyasini indirip **yonetici olarak calistirin**. Bu kurulum:
+            - ZaraGON.exe'yi C:\ZaraGON icine kopyalar
+            - Masaustu ve Baslat menusu kisayollarini olusturur
+            - Program Ekle/Kaldir'a kaydeder
+            Sadece ZaraGON.exe indirirseniz kisayol ve Program Ekle Kaldir olusmaz.
