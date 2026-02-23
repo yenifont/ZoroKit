@@ -1,10 +1,8 @@
 ; ZaraGON Installer Script - Inno Setup 6+
-; Full PC installation (C:\ZaraGON) with admin privileges
-; Turkish UI, proper Add/Remove Programs registration
-;
-; Program Ekle/Kaldir: AppId ile HKLM\...\Uninstall\{AppId} otomatik yazilir (UninstallDisplayName, UninstallDisplayIcon, UninstallString).
-; Kisa yollar: [Tasks] desktopicon + startmenuicon varsayilan acik (Masaustu + Baslat menusu).
-; Temiz kaldirma: [Code] + [UninstallRun] ile tum ZaraGON/Apache/PHP/MariaDB surecleri durdurulur, hosts temizlenir, kurulum dizini silinir.
+; KULLANICI MUTLAKA "ZaraGON-Setup-xxx.exe" CALISTIRMALI. Sadece ZaraGON.exe calistirilirsa kisayol ve Program Ekle Kaldir OLUSMAZ.
+; Bu script ile: C:\ZaraGON\ZaraGON.exe + Masaustu kisayolu + Baslat menusu (ZaraGON + ZaraGON Kaldir) + Program Ekle/Kaldir kaydi.
+; PrivilegesRequired=admin - kurulum yonetici olarak calistirilmalidir.
+; Temiz kaldirma: [Code] + [UninstallRun] ile surecler durdurulur, hosts temizlenir, kurulum dizini silinir.
 
 #define MyAppName "ZaraGON"
 #define MyAppVersion "1.0.7"
@@ -76,7 +74,7 @@ Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 WelcomeLabel1={#MyAppName} Kurulumuna Hosgeldiniz
 WelcomeLabel2=Bu sihirbaz {#MyAppName} {#MyAppVersion} surumunu bilgisayariniza kuracaktir.%n%n{#MyAppName}, Apache, PHP ve MariaDB ile yerel gelistirme ortami yoneticisidir.%n%nTum gerekli bilesenler dahildir, ek bir yukleme gerekmez.%n%nDevam etmek icin Ileri'ye tiklayin.
 FinishedHeadingLabel={#MyAppName} Kurulumu Tamamlandi!
-FinishedLabel={#MyAppName} basariyla kuruldu.%n%nMasaustu ve Baslat menusunde kisayollar olusturuldu. Kaldirmak icin: Ayarlar > Uygulamalar > {#MyAppName} > Kaldir veya Baslat menusundeki "ZaraGON Kaldir" kisayolunu kullanin.%n%nGorev cubuguna sabitlemek icin uygulamayi calistirip simgeye sag tiklayin > Gorev cubuguna sabitle.
+FinishedLabel={#MyAppName} kuruldu.%n%nCALISTIRMA: Masaustundeki veya Baslat menusundeki "ZaraGON" kisayoluna tiklayin (ya da {app}\{#MyAppExeName}).%n%nKALDIRMA: Ayarlar > Uygulamalar > {#MyAppName} > Kaldir - veya Baslat menusundeki "ZaraGON Kaldir" kisayolunu kullanin.%n%nGorev cubuguna sabitlemek icin uygulamayi acip simgeye sag tiklayin > Gorev cubuguna sabitle.
 SelectDirLabel3={#MyAppName} asagidaki klasore kurulacaktir.
 SelectDirBrowseLabel=Devam etmek icin Ileri'ye tiklayin. Farkli bir klasor secmek icin Gozat'a tiklayin.
 ReadyLabel1=Kuruluma Hazir
@@ -85,8 +83,7 @@ SelectTasksLabel2=Yapmak istediginiz ek gorevleri secin:
 ClickFinish=Kurulumu tamamlamak icin Bitir'e tiklayin.
 
 [Tasks]
-Name: "desktopicon"; Description: "Masaustune kisayol olustur"; GroupDescription: "Ek gorevler:"; Flags: checked
-Name: "startmenuicon"; Description: "Baslat menusune ekle (ZaraGON Kaldir kisayolu dahil)"; GroupDescription: "Ek gorevler:"; Flags: checked
+; Masaustu ve Baslat kisayollari [Icons] icinde Tasks olmadan her zaman olusur; bu gorevler sadece bilgi.
 Name: "startupicon"; Description: "Windows ile birlikte baslat"; GroupDescription: "Ek gorevler:"; Flags: unchecked
 
 [Files]
@@ -100,12 +97,13 @@ Source: "..\publish\*.json"; DestDir: "{app}"; Flags: ignoreversion skipifsource
 Source: "..\publish\Resources\*"; DestDir: "{app}\Resources"; Flags: ignoreversion skipifsourcedoesntexist recursesubdirs createallsubdirs
 
 [Icons]
-; Start Menu shortcuts
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Comment: "{#MyAppDescription}"; Tasks: startmenuicon
-Name: "{group}\{#MyAppName} Kaldir"; Filename: "{uninstallexe}"; Tasks: startmenuicon
-; Desktop shortcut
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppExeName}"; Comment: "{#MyAppDescription}"; Tasks: desktopicon
-; Windows Startup
+; C:\ZaraGON\ZaraGON.exe kurulur. Asagidaki kisayollar HER ZAMAN olusturulur (Tasks yok = zorunlu).
+; Baslat menusu: ZaraGON + ZaraGON Kaldir
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Comment: "{#MyAppDescription}"
+Name: "{group}\{#MyAppName} Kaldir"; Filename: "{uninstallexe}"
+; Masaustu
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\{#MyAppExeName}"; Comment: "{#MyAppDescription}"
+; Windows ile birlikte baslat (secimlik)
 Name: "{commonstartup}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: startupicon
 
 [Run]
