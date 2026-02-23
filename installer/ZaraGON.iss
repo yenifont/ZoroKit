@@ -78,7 +78,7 @@ FinishedLabel={#MyAppName} kuruldu.%n%nYerel adres: https://zaragon.app (ilk aci
 SelectDirLabel3={#MyAppName} asagidaki klasore kurulacaktir.
 SelectDirBrowseLabel=Devam etmek icin Ileri'ye tiklayin. Farkli bir klasor secmek icin Gozat'a tiklayin.
 ReadyLabel1=Kuruluma Hazir
-ReadyLabel2a={#MyAppName} kurulmaya hazir.%n%nHedef: {#DefaultDirName}%nYerel adres: https://zaragon.app%n%nBaslamak icin Kur'a tiklayin.
+ReadyLabel2a={#MyAppName} kurulmaya hazir.%n%nHedef: C:\{#MyAppName}%nYerel adres: https://zaragon.app%n%nBaslamak icin Kur'a tiklayin.
 SelectTasksLabel2=Yapmak istediginiz ek gorevleri secin:
 ClickFinish=Kurulumu tamamlamak icin Bitir'e tiklayin.
 
