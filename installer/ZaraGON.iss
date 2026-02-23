@@ -7,7 +7,7 @@
 ; Temiz kaldirma: [Code] + [UninstallRun] ile tum ZaraGON/Apache/PHP/MariaDB surecleri durdurulur, hosts temizlenir, kurulum dizini silinir.
 
 #define MyAppName "ZaraGON"
-#define MyAppVersion "1.0.6"
+#define MyAppVersion "1.0.7"
 #define MyAppPublisher "ZaraGON"
 #define MyAppURL "https://github.com/ZaraGON"
 #define MyAppExeName "ZaraGON.exe"
@@ -61,7 +61,7 @@ CloseApplications=force
 RestartApplications=no
 
 ; Version info embedded in setup exe
-VersionInfoVersion=1.0.6.0
+VersionInfoVersion=1.0.7.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription={#MyAppName} Kurulum
 VersionInfoTextVersion={#MyAppVersion}
