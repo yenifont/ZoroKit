@@ -12,15 +12,17 @@ public partial class FirstRunWindow : Window
     private readonly IVersionManager _versionManager;
     private readonly IConfigurationManager _configManager;
     private readonly IVcRedistChecker _vcRedistChecker;
+    private readonly IPortManager _portManager;
 
     public bool SetupCompleted { get; private set; }
 
-    public FirstRunWindow(IVersionManager versionManager, IConfigurationManager configManager, IVcRedistChecker vcRedistChecker)
+    public FirstRunWindow(IVersionManager versionManager, IConfigurationManager configManager, IVcRedistChecker vcRedistChecker, IPortManager portManager)
     {
         InitializeComponent();
         _versionManager = versionManager;
         _configManager = configManager;
         _vcRedistChecker = vcRedistChecker;
+        _portManager = portManager;
 
         Loaded += async (_, _) => await RunSetupAsync();
     }
@@ -35,6 +37,11 @@ public partial class FirstRunWindow : Window
             StatusText.Text = "Mevcut servisler durduruluyor...";
             DetailText.Text = "";
             await Task.Run(() => KillRunningServices());
+
+            // Apache/DB portlari mesgulse (ve sistem islemi degilse) kapat; kurulum sonrasi cakisma onlenir
+            StatusText.Text = "Portlar kontrol ediliyor...";
+            DetailText.Text = "";
+            await FreePortsIfPossibleAsync();
 
             StatusText.Text = "Mevcut surumler kontrol ediliyor...";
             DetailText.Text = "Indirme sunucularina baglaniliyor...";
@@ -266,7 +273,8 @@ public partial class FirstRunWindow : Window
 
     private static void KillRunningServices()
     {
-        string[] processNames = ["httpd", "mysqld", "mariadbd"];
+        // PHP de kapatilsin; ext/*.dll kilitlenmesin (Access denied hatasi onlenir)
+        string[] processNames = ["httpd", "php", "php-cgi", "mysqld", "mariadbd"];
         foreach (var name in processNames)
         {
             try
@@ -279,5 +287,22 @@ public partial class FirstRunWindow : Window
             }
             catch { }
         }
+    }
+
+    /// <summary>Apache ve MariaDB varsayilan portlari (80, 443, 3306) mesgulse ve guvenliyse islemi kapatir.</summary>
+    private async Task FreePortsIfPossibleAsync()
+    {
+        try
+        {
+            var config = await _configManager.LoadAsync();
+            var ports = new[] { config.ApachePort, config.ApacheSslPort, config.MySqlPort };
+            foreach (var port in ports.Distinct())
+            {
+                var conflict = await _portManager.GetPortConflictAsync(port);
+                if (conflict != null && !conflict.IsSystemCritical)
+                    await _portManager.KillProcessOnPortAsync(port);
+            }
+        }
+        catch { /* port temizligi iptal degil; devam et */ }
     }
 }

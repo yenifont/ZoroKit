@@ -97,7 +97,8 @@ public partial class App : System.Windows.Application
         {
             var configManager = _serviceProvider.GetRequiredService<IConfigurationManager>();
             var vcRedistChecker = _serviceProvider.GetRequiredService<IVcRedistChecker>();
-            var firstRun = new FirstRunWindow(versionManager, configManager, vcRedistChecker);
+            var portManager = _serviceProvider.GetRequiredService<IPortManager>();
+            var firstRun = new FirstRunWindow(versionManager, configManager, vcRedistChecker, portManager);
             firstRun.ShowDialog();
 
             if (!firstRun.SetupCompleted)
@@ -839,10 +840,17 @@ public partial class App : System.Windows.Application
         if (_currentIconHandle != IntPtr.Zero)
             DestroyIcon(_currentIconHandle);
 
-        // Kill tunnel process if running
+        // Tüneli kapat
         try { _serviceProvider?.GetService<DashboardViewModel>()?.StopTunnel(); } catch { }
 
-        // Services keep running in background - only dispose DI container
+        // Cikista Apache ve MariaDB durdur; portlar bosalsin (Program Ekle Kaldir zaten taskkill ile kapatir)
+        try
+        {
+            var orchestrator = _serviceProvider?.GetService<OrchestratorService>();
+            orchestrator?.ShutdownAsync().GetAwaiter().GetResult();
+        }
+        catch { /* cikis engellenmesin */ }
+
         _serviceProvider?.Dispose();
 
         // Release single instance mutex

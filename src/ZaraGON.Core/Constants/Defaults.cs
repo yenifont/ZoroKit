@@ -38,7 +38,7 @@ public static class Defaults
     public const string VcRedistFileName = "vc_redist.x64.exe";
 
     // App update (GitHub)
-    public const string AppVersion = "1.0.9";
+    public const string AppVersion = "1.0.10";
     public const string GitHubOwner = "yenifont";
     public const string GitHubRepo = "ZaraGON";
     public const string GitHubReleasesApi = $"https://api.github.com/repos/{GitHubOwner}/{GitHubRepo}/releases/latest";

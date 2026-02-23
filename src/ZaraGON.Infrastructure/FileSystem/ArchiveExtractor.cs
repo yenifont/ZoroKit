@@ -36,12 +36,29 @@ public sealed class ArchiveExtractor : IArchiveExtractor
                     if (entryDir != null && !Directory.Exists(entryDir))
                         Directory.CreateDirectory(entryDir);
 
-                    entry.ExtractToFile(destinationPath, overwrite: true);
+                    ExtractEntryWithRetry(entry, destinationPath);
                 }
 
                 processed++;
                 progress?.Report((double)processed / totalEntries * 100);
             }
         }, ct);
+    }
+
+    private static void ExtractEntryWithRetry(ZipArchiveEntry entry, string destinationPath, int maxRetries = 3)
+    {
+        for (var attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                entry.ExtractToFile(destinationPath, overwrite: true);
+                return;
+            }
+            catch (IOException) when (attempt < maxRetries)
+            {
+                // Access denied: antivirus veya baska process dosyayi kilitlemis olabilir; kisa bekle ve tekrar dene
+                Thread.Sleep(800 * attempt);
+            }
+        }
     }
 }

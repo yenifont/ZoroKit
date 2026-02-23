@@ -65,7 +65,6 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
 
             var tld = config.VirtualHostTld;
             var port = config.ApachePort;
-            var hostsEntries = new List<HostEntry>();
             var previousSites = new List<string>();
 
             lock (_lock)
@@ -100,8 +99,6 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
                     }
                 }
 
-                hostsEntries.Add(new HostEntry { IpAddress = "127.0.0.1", Hostname = hostname });
-
                 if (!previousSites.Contains(siteName))
                     SiteAdded?.Invoke(this, siteName);
             }
@@ -133,15 +130,8 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
                     SiteRemoved?.Invoke(this, prev);
             }
 
-            // Sync hosts entries
-            try
-            {
-                await _hostsManager.SyncEntriesAsync(hostsEntries, ct);
-            }
-            catch
-            {
-                // Hosts file may need elevation - don't crash
-            }
+            // Hosts dosyasina www alt klasorleri yazilmiyor; varsayilan sadece zaragon.test (EnsureDefaultZaragonHostAsync).
+            // Kullanici Hosts File sayfasindan isterse ekler.
         }
         finally
         {

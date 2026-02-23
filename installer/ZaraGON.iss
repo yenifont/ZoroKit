@@ -5,7 +5,7 @@
 ; Temiz kaldirma: [Code] + [UninstallRun] ile surecler durdurulur, hosts temizlenir, kurulum dizini silinir.
 
 #define MyAppName "ZaraGON"
-#define MyAppVersion "1.0.9"
+#define MyAppVersion "1.0.10"
 #define MyAppPublisher "ZaraGON"
 #define MyAppURL "https://github.com/ZaraGON"
 #define MyAppExeName "ZaraGON.exe"
@@ -59,7 +59,7 @@ CloseApplications=force
 RestartApplications=no
 
 ; Version info embedded in setup exe
-VersionInfoVersion=1.0.9.0
+VersionInfoVersion=1.0.10.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription={#MyAppName} Kurulum
 VersionInfoTextVersion={#MyAppVersion}
