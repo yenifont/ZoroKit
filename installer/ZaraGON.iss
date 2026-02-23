@@ -70,15 +70,15 @@ VersionInfoProductVersion={#MyAppVersion}
 Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 
 [Messages]
-; Custom Turkish welcome text
+; Laragon tarzi: hosgeldin, hedef klasor, guzel URL + otomatik sanal konak, hazir, tamamlandi
 WelcomeLabel1={#MyAppName} Kurulumuna Hosgeldiniz
-WelcomeLabel2=Bu sihirbaz {#MyAppName} {#MyAppVersion} surumunu bilgisayariniza kuracaktir.%n%n{#MyAppName}, Apache, PHP ve MariaDB ile yerel gelistirme ortami yoneticisidir.%n%nTum gerekli bilesenler dahildir, ek bir yukleme gerekmez.%n%nDevam etmek icin Ileri'ye tiklayin.
+WelcomeLabel2=Bu sihirbaz {#MyAppName} {#MyAppVersion} surumunu bilgisayariniza kuracaktir.%n%n{#MyAppName}, Apache, PHP ve MariaDB ile yerel gelistirme ortami yoneticisidir (Laragon/XAMPP benzeri).%n%nProjeleriniz guzel URL alacak: https://zaragon.app%nOtomatik sanal konaklar desteklenir.%n%nDevam etmek icin Ileri'ye tiklayin.
 FinishedHeadingLabel={#MyAppName} Kurulumu Tamamlandi!
-FinishedLabel={#MyAppName} kuruldu.%n%nCALISTIRMA: Masaustundeki veya Baslat menusundeki "ZaraGON" kisayoluna tiklayin (ya da {app}\{#MyAppExeName}).%n%nKALDIRMA: Ayarlar > Uygulamalar > {#MyAppName} > Kaldir - veya Baslat menusundeki "ZaraGON Kaldir" kisayolunu kullanin.%n%nGorev cubuguna sabitlemek icin uygulamayi acip simgeye sag tiklayin > Gorev cubuguna sabitle.
+FinishedLabel={#MyAppName} kuruldu.%n%nYerel adres: https://zaragon.app (ilk acilista otomatik eklenir).%n%nCALISTIRMA: Masaustundeki veya Baslat menusundeki "ZaraGON" kisayoluna tiklayin.%n%nKALDIRMA: Ayarlar > Uygulamalar > {#MyAppName} > Kaldir
 SelectDirLabel3={#MyAppName} asagidaki klasore kurulacaktir.
 SelectDirBrowseLabel=Devam etmek icin Ileri'ye tiklayin. Farkli bir klasor secmek icin Gozat'a tiklayin.
 ReadyLabel1=Kuruluma Hazir
-ReadyLabel2a={#MyAppName} kurulmaya hazir. Baslamak icin Kur'a tiklayin.
+ReadyLabel2a={#MyAppName} kurulmaya hazir.%n%nHedef: {#DefaultDirName}%nYerel adres: https://zaragon.app%n%nBaslamak icin Kur'a tiklayin.
 SelectTasksLabel2=Yapmak istediginiz ek gorevleri secin:
 ClickFinish=Kurulumu tamamlamak icin Bitir'e tiklayin.
 

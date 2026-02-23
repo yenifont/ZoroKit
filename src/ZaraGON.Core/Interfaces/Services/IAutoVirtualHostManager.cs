@@ -9,7 +9,7 @@ public interface IAutoVirtualHostManager
     /// </summary>
     Task EnsureVHostForHostnameAsync(string hostname, CancellationToken ct = default);
     /// <summary>
-    /// İlk kurulumda varsayılan zaragon.test (veya .app) host kaydı ve ana www vhost'unu ekler.
+    /// İlk kurulumda varsayılan zaragon.app host kaydı ve ana www vhost'unu ekler.
     /// </summary>
     Task EnsureDefaultZaragonHostAsync(CancellationToken ct = default);
     Task StartWatchingAsync(CancellationToken ct = default);

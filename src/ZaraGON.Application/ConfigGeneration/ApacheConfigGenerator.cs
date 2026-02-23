@@ -42,11 +42,17 @@ public sealed class ApacheConfigGenerator
         if (sslEnabled && !string.IsNullOrEmpty(sslDir))
         {
             sslDir = sslDir.Replace('\\', '/');
+            // SSLSessionCache path: under logDir (same as error.log) for consistency
+            var sslCachePath = $"{logDir}/ssl_scache(512000)".Replace('\\', '/');
             sslConfig = $"""
 
-            # SSL
+            # SSL (XAMPP/Laragon-style: cipher suite, protocol, session cache)
             LoadModule ssl_module modules/mod_ssl.so
             Listen 127.0.0.1:{sslPort}
+            SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES:!CAMELLIA
+            SSLProtocol TLSv1.2 TLSv1.3
+            SSLSessionCache "shmcb:{sslCachePath}"
+            SSLSessionCacheTimeout 300
             SSLRandomSeed startup builtin
             SSLRandomSeed connect builtin
             """;
@@ -75,12 +81,14 @@ public sealed class ApacheConfigGenerator
             LoadModule cgi_module modules/mod_cgi.so
             LoadModule dir_module modules/mod_dir.so
             LoadModule env_module modules/mod_env.so
+            LoadModule filter_module modules/mod_filter.so
             LoadModule headers_module modules/mod_headers.so
             LoadModule include_module modules/mod_include.so
             LoadModule isapi_module modules/mod_isapi.so
             LoadModule log_config_module modules/mod_log_config.so
             LoadModule mime_module modules/mod_mime.so
             LoadModule negotiation_module modules/mod_negotiation.so
+            LoadModule reqtimeout_module modules/mod_reqtimeout.so
             LoadModule rewrite_module modules/mod_rewrite.so
             LoadModule setenvif_module modules/mod_setenvif.so
             {{sslConfig}}
@@ -91,6 +99,17 @@ public sealed class ApacheConfigGenerator
 
             ServerAdmin admin@localhost
             ServerName localhost:{{listenPort}}
+            Timeout 60
+            KeepAlive On
+            MaxKeepAliveRequests 100
+            KeepAliveTimeout 5
+            AccessFileName .htaccess
+            ServerTokens Prod
+            ServerSignature Off
+
+            <IfModule headers_module>
+                RequestHeader unset Proxy early
+            </IfModule>
 
             <Directory />
                 AllowOverride None
@@ -110,6 +129,9 @@ public sealed class ApacheConfigGenerator
 
             <FilesMatch "\.php$">
                 SetHandler application/x-httpd-php
+            </FilesMatch>
+            <FilesMatch "\.phps$">
+                SetHandler application/x-httpd-php-source
             </FilesMatch>
 
             ErrorLog "{{logDir}}/error.log"
@@ -132,6 +154,14 @@ public sealed class ApacheConfigGenerator
             Include "{{vhostsConfPath}}"
             {{sitesInclude}}
             {{aliasInclude}}
+
+            <IfModule reqtimeout_module>
+                RequestReadTimeout header=20-40,MinRate=500 body=20,MinRate=500
+            </IfModule>
+
+            # Windows: disable AcceptFilter optimizations that can cause connection issues (e.g. IE 64-bit, some clients)
+            AcceptFilter http none
+            AcceptFilter https none
             """;
     }
 }

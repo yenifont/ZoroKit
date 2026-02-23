@@ -91,7 +91,13 @@ public sealed class ApacheService : IServiceController
 
             // Validate config (now with correct DLLs in place)
             if (!await ValidateConfigAsync(ct))
-                throw new ServiceStartException("Apache", "Configuration validation failed. Run 'httpd -t' for details.");
+            {
+                var errorDetail = await GetConfigValidationErrorAsync(ct);
+                var message = string.IsNullOrWhiteSpace(errorDetail)
+                    ? "Yapılandırma hatası. Ayarlar > Apache veya Loglar sayfasından httpd.conf kontrol edin."
+                    : $"Yapılandırma hatası: {errorDetail.Trim()}";
+                throw new ServiceStartException("Apache", message);
+            }
 
             var configPath = GetConfigPath();
             var workingDir = Path.GetDirectoryName(httpdPath);
@@ -227,6 +233,28 @@ public sealed class ApacheService : IServiceController
         catch
         {
             return false;
+        }
+    }
+
+    /// <summary>httpd -t ciktisini dondurur; hata varsa kullaniciya gosterilecek metin.</summary>
+    private async Task<string?> GetConfigValidationErrorAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            var httpdPath = await _versionManager.GetBinaryPathAsync(ServiceType.Apache, ct);
+            var configPath = GetConfigPath();
+            if (!_fileSystem.FileExists(configPath)) return null;
+
+            var (stdout, stderr, exitCode) = await _processManager.RunCommandAsync(
+                httpdPath, $"-t -f \"{configPath}\"", null, ct);
+
+            if (exitCode == 0) return null;
+            var combined = $"{stderr}\n{stdout}".Trim();
+            return string.IsNullOrWhiteSpace(combined) ? null : combined;
+        }
+        catch (Exception ex)
+        {
+            return ex.Message;
         }
     }
 

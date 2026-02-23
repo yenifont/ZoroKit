@@ -130,7 +130,7 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
                     SiteRemoved?.Invoke(this, prev);
             }
 
-            // Hosts dosyasina www alt klasorleri yazilmiyor; varsayilan sadece zaragon.test (EnsureDefaultZaragonHostAsync).
+            // Hosts dosyasina www alt klasorleri yazilmiyor; varsayilan sadece zaragon.app (EnsureDefaultZaragonHostAsync).
             // Kullanici Hosts File sayfasindan isterse ekler.
         }
         finally

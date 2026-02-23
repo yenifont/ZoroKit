@@ -19,8 +19,8 @@ public static class Defaults
     public const string AppsDir = "apps";
     public const string ComposerDir = "bin/composer";
     public const string VirtualHostTld = ".test";
-    /// <summary>İlk kurulumda otomatik eklenecek varsayılan hostname (ana www'ü açar).</summary>
-    public const string DefaultZaragonHostname = "zaragon.test";
+    /// <summary>İlk kurulumda otomatik eklenecek varsayılan hostname (ana www'ü açar). Laragon tarzı: https://zaragon.app</summary>
+    public const string DefaultZaragonHostname = "zaragon.app";
     public const string MainConfigFile = "config/zoragon.json";
     public const string VersionsFile = "config/versions.json";
     public const string DefaultPhpInfo = "<?php phpinfo(); ?>"; // Legacy fallback

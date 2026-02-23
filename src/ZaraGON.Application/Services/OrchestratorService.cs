@@ -88,7 +88,7 @@ public sealed class OrchestratorService
         _fileSystem.CreateDirectory(Path.Combine(_basePath, Defaults.SitesEnabledDir));
         _fileSystem.CreateDirectory(Path.Combine(_basePath, Defaults.SslDir));
 
-        // İlk kurulumda varsayılan zaragon.test hosts + vhost (ana www açılır)
+        // İlk kurulumda varsayılan zaragon.app hosts + vhost (ana www açılır)
         try { await _autoVHostManager.EnsureDefaultZaragonHostAsync(ct); }
         catch { /* hosts yazma yükseltme gerektirebilir */ }
 
