@@ -1214,6 +1214,21 @@ public sealed partial class DashboardViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void CopyTunnelUrl()
+    {
+        if (string.IsNullOrEmpty(TunnelUrl)) return;
+        try
+        {
+            Clipboard.SetText(TunnelUrl);
+            _toastService.ShowSuccess("Tünel URL'si panoya kopyalandı");
+        }
+        catch (Exception ex)
+        {
+            _toastService.ShowError($"Kopyalanamadı: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
     private async Task RefreshHealthAsync()
     {
         try

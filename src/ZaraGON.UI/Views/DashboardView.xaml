@@ -250,6 +250,11 @@
                                 Padding="10,6" Margin="0,4,0,0"
                                 Visibility="{Binding IsTunnelRunning, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <DockPanel>
+                                <Button Command="{Binding CopyTunnelUrlCommand}" DockPanel.Dock="Right"
+                                        Style="{StaticResource GhostButtonStyle}" Padding="6,2" Margin="4,0,0,0"
+                                        ToolTip="URL'yi panoya kopyala" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="ContentCopy" Width="14" Height="14" />
+                                </Button>
                                 <Ellipse Width="7" Height="7" Fill="#16A34A" Margin="0,0,8,0" VerticalAlignment="Center" />
                                 <TextBlock Text="{Binding TunnelUrl}" FontSize="10.5" VerticalAlignment="Center"
                                            Foreground="{StaticResource PrimaryBrush}" TextTrimming="CharacterEllipsis"

@@ -17,7 +17,7 @@ public class PortConflictException : ZaraGONException
 {
     public int Port { get; }
     public int? ConflictingPid { get; }
-    public PortConflictException(int port, int? pid = null) : base($"Port {port} is already in use" + (pid.HasValue ? $" by PID {pid}" : ""))
+    public PortConflictException(int port, int? pid = null) : base($"Port {port} zaten kullanımda" + (pid.HasValue ? $" (PID: {pid})" : ""))
     {
         Port = port;
         ConflictingPid = pid;

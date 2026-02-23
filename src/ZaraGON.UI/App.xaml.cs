@@ -725,7 +725,12 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<IConfigurationManager>(),
                 sp.GetRequiredService<IVcRedistChecker>()));
 
-        // Orchestrator
+        // UI Services (ToastService önce; Orchestrator port bildirimi için gerekli)
+        services.AddSingleton<ToastService>(new ToastService(basePath));
+        services.AddSingleton<NavigationService>();
+        services.AddSingleton<DialogService>();
+
+        // Orchestrator (port çakışmasında kullanıcıya toast ile bildirim)
         services.AddSingleton<OrchestratorService>(sp =>
             new OrchestratorService(
                 sp.GetRequiredService<IServiceController>(),
@@ -739,12 +744,8 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<IAutoVirtualHostManager>(),
                 sp.GetRequiredService<IPortManager>(),
                 sp.GetRequiredService<HttpClient>(),
-                basePath));
-
-        // UI Services
-        services.AddSingleton<NavigationService>();
-        services.AddSingleton<DialogService>();
-        services.AddSingleton<ToastService>(new ToastService(basePath));
+                basePath,
+                onPortConflictResolved: msg => sp.GetRequiredService<ToastService>().ShowInfo(msg)));
 
         // ViewModels
         services.AddSingleton<DashboardViewModel>(sp =>

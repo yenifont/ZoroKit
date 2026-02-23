@@ -22,6 +22,7 @@ public sealed class OrchestratorService
     private readonly IPortManager _portManager;
     private readonly HttpClient _httpClient;
     private readonly string _basePath;
+    private readonly Action<string>? _onPortConflictResolved;
 
     public OrchestratorService(
         IServiceController apacheController,
@@ -35,7 +36,8 @@ public sealed class OrchestratorService
         IAutoVirtualHostManager autoVHostManager,
         IPortManager portManager,
         HttpClient httpClient,
-        string basePath)
+        string basePath,
+        Action<string>? onPortConflictResolved = null)
     {
         _apacheController = apacheController;
         _mariaDbController = mariaDbController;
@@ -49,6 +51,7 @@ public sealed class OrchestratorService
         _portManager = portManager;
         _httpClient = httpClient;
         _basePath = basePath;
+        _onPortConflictResolved = onPortConflictResolved;
     }
 
     public async Task InitializeAsync(CancellationToken ct = default)
@@ -413,38 +416,58 @@ public sealed class OrchestratorService
     private async Task ResolvePortConflictsAsync(AppConfiguration config, CancellationToken ct)
     {
         var changed = false;
+        var messages = new List<string>();
 
+        // Apache: varsayılan 80 meşgulse önce 8080, yoksa 81..180 dene
         if (!await _portManager.IsPortAvailableAsync(config.ApachePort, ct))
         {
-            var freePort = await _portManager.FindAvailablePortAsync(config.ApachePort + 1, config.ApachePort + 100, ct);
+            const int preferredAlt = 8080;
+            int? freePort = await _portManager.IsPortAvailableAsync(preferredAlt, ct)
+                ? preferredAlt
+                : await _portManager.FindAvailablePortAsync(config.ApachePort + 1, config.ApachePort + 100, ct);
             if (freePort.HasValue)
             {
+                var oldPort = config.ApachePort;
                 config.ApachePort = freePort.Value;
                 changed = true;
+                messages.Add($"Port {oldPort} meşgul; Apache {freePort.Value} portuna alındı.");
             }
         }
 
+        // SSL: varsayılan 443 meşgulse önce 8443, yoksa 444..543 dene
         if (!await _portManager.IsPortAvailableAsync(config.ApacheSslPort, ct))
         {
-            var freePort = await _portManager.FindAvailablePortAsync(config.ApacheSslPort + 1, config.ApacheSslPort + 100, ct);
+            const int preferredAlt = 8443;
+            int? freePort = await _portManager.IsPortAvailableAsync(preferredAlt, ct)
+                ? preferredAlt
+                : await _portManager.FindAvailablePortAsync(config.ApacheSslPort + 1, config.ApacheSslPort + 100, ct);
             if (freePort.HasValue)
             {
+                var oldPort = config.ApacheSslPort;
                 config.ApacheSslPort = freePort.Value;
                 changed = true;
+                messages.Add($"SSL portu {oldPort} meşgul; {freePort.Value} kullanılıyor.");
             }
         }
 
+        // MariaDB: 3306 meşgulse 3307..3406
         if (!await _portManager.IsPortAvailableAsync(config.MySqlPort, ct))
         {
             var freePort = await _portManager.FindAvailablePortAsync(config.MySqlPort + 1, config.MySqlPort + 100, ct);
             if (freePort.HasValue)
             {
+                var oldPort = config.MySqlPort;
                 config.MySqlPort = freePort.Value;
                 changed = true;
+                messages.Add($"MariaDB portu {oldPort} meşgul; {freePort.Value} kullanılıyor.");
             }
         }
 
         if (changed)
+        {
             await _configManager.SaveAsync(config, ct);
+            foreach (var msg in messages)
+                _onPortConflictResolved?.Invoke(msg);
+        }
     }
 }

@@ -1,6 +1,10 @@
 ; ZaraGON Installer Script - Inno Setup 6+
 ; Full PC installation (C:\ZaraGON) with admin privileges
 ; Turkish UI, proper Add/Remove Programs registration
+;
+; Program Ekle/Kaldir: AppId ile HKLM\...\Uninstall\{AppId} otomatik yazilir (UninstallDisplayName, UninstallDisplayIcon, UninstallString).
+; Kisa yollar: [Tasks] desktopicon + startmenuicon varsayilan acik (Masaustu + Baslat menusu).
+; Temiz kaldirma: [Code] + [UninstallRun] ile tum ZaraGON/Apache/PHP/MariaDB surecleri durdurulur, hosts temizlenir, kurulum dizini silinir.
 
 #define MyAppName "ZaraGON"
 #define MyAppVersion "1.0.6"

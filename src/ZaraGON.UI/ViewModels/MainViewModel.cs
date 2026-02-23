@@ -3,6 +3,7 @@ using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ZaraGON.Application.Services;
+using ZaraGON.Core.Constants;
 using ZaraGON.Core.Interfaces.Infrastructure;
 using ZaraGON.Core.Interfaces.Services;
 using ZaraGON.UI.Services;
@@ -20,7 +21,10 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly DispatcherTimer _portRefreshTimer;
 
     [ObservableProperty]
-    private string _title = "ZaraGON";
+    private string _title = $"ZaraGON v{Defaults.AppVersion}";
+
+    /// <summary>Pencere başlığı ve arayüzde gösterilen uygulama sürümü.</summary>
+    public string AppVersion => Defaults.AppVersion;
 
     [ObservableProperty]
     private string _currentView = "Dashboard";
