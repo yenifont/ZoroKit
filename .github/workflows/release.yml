@@ -28,6 +28,11 @@ jobs:
             -p:IncludeNativeLibrariesForSelfExtract=true `
             -o publish
 
+      - name: Generate wizard images (version from tag)
+        run: |
+          $ver = $env:GITHUB_REF -replace 'refs/tags/v',''
+          .\installer\generate-images.ps1 -Version $ver
+
       - name: Build installer (Inno Setup)
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:

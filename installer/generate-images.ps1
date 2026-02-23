@@ -1,9 +1,13 @@
 # Generate wizard BMP images for Inno Setup from app.png
+# Usage: .\generate-images.ps1 [-Version "1.0.9"]  (version sol panelde gorunur; CI tag'den verilir)
+param([string]$Version = "1.0.0")
+
 Add-Type -AssemblyName System.Drawing
 
 $root = Split-Path $PSScriptRoot -Parent
 $appPng = Join-Path $root "src\ZaraGON.UI\Resources\app.png"
 $outDir = $PSScriptRoot
+$versionText = if ($Version -match "^\d") { "v$Version" } else { $Version }
 
 $logo = [System.Drawing.Image]::FromFile($appPng)
 
@@ -37,11 +41,11 @@ $sf.Alignment = [System.Drawing.StringAlignment]::Center
 $rect = New-Object System.Drawing.RectangleF(0, ($y + $logoSize + 12), $w, 30)
 $g.DrawString("ZaraGON", $font, $textBrush, $rect, $sf)
 
-# Version text
+# Version text (parametreden; CI'da tag ile guncellenir)
 $fontSmall = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Regular)
 $mutedBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(200, 255, 255, 255))
 $rect2 = New-Object System.Drawing.RectangleF(0, ($y + $logoSize + 40), $w, 20)
-$g.DrawString("v1.0.0", $fontSmall, $mutedBrush, $rect2, $sf)
+$g.DrawString($versionText, $fontSmall, $mutedBrush, $rect2, $sf)
 
 $g.Dispose()
 $bmp.Save((Join-Path $outDir "wizard.bmp"), [System.Drawing.Imaging.ImageFormat]::Bmp)
