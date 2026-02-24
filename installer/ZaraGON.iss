@@ -5,7 +5,7 @@
 ; Temiz kaldirma: [Code] + [UninstallRun] ile surecler durdurulur, hosts temizlenir, kurulum dizini silinir.
 
 #define MyAppName "ZaraGON"
-#define MyAppVersion "1.0.11"
+#define MyAppVersion "1.0.12"
 #define MyAppPublisher "ZaraGON"
 #define MyAppURL "https://github.com/ZaraGON"
 #define MyAppExeName "ZaraGON.exe"
@@ -59,7 +59,7 @@ CloseApplications=force
 RestartApplications=no
 
 ; Version info embedded in setup exe
-VersionInfoVersion=1.0.11.0
+VersionInfoVersion=1.0.12.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription={#MyAppName} Kurulum
 VersionInfoTextVersion={#MyAppVersion}
@@ -72,7 +72,7 @@ Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 [Messages]
 ; Laragon tarzi: hosgeldin, hedef klasor, guzel URL + otomatik sanal konak, hazir, tamamlandi
 WelcomeLabel1={#MyAppName} Kurulumuna Hosgeldiniz
-WelcomeLabel2=Bu sihirbaz {#MyAppName} {#MyAppVersion} surumunu bilgisayariniza kuracaktir.%n%n{#MyAppName}, Apache, PHP ve MariaDB ile yerel gelistirme ortami yoneticisidir (Laragon/XAMPP benzeri).%n%nProjeleriniz guzel URL alacak: https://zaragon.app%nOtomatik sanal konaklar desteklenir.%n%nDevam etmek icin Ileri'ye tiklayin.
+WelcomeLabel2=Bu sihirbaz {#MyAppName} {#MyAppVersion} surumunu bilgisayariniza kuracaktir.%n%n{#MyAppName}, Apache, PHP ve MariaDB ile yerel web gelistirme ortaminizi tek yerden yonetir.%n%nProjeleriniz guzel URL alacak: https://zaragon.app%nOtomatik sanal konaklar desteklenir.%n%nDevam etmek icin Ileri'ye tiklayin.
 FinishedHeadingLabel={#MyAppName} Kurulumu Tamamlandi!
 FinishedLabel={#MyAppName} kuruldu.%n%nYerel adres: https://zaragon.app (ilk acilista otomatik eklenir).%n%nCALISTIRMA: Masaustundeki veya Baslat menusundeki "ZaraGON" kisayoluna tiklayin.%n%nKALDIRMA: Ayarlar > Uygulamalar > {#MyAppName} > Kaldir
 SelectDirLabel3={#MyAppName} asagidaki klasore kurulacaktir.

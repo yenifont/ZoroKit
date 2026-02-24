@@ -11,7 +11,7 @@ public sealed class AppConfiguration
     public string ActiveMariaDbVersion { get; set; } = string.Empty;
     public bool AutoStartApache { get; set; }
     public bool AutoStartMariaDb { get; set; }
-    public bool AutoVirtualHosts { get; set; } = true;
+    public bool AutoVirtualHosts { get; set; }
     public string VirtualHostTld { get; set; } = ".test";
     public bool SslEnabled { get; set; }
     public bool RunOnWindowsStartup { get; set; }

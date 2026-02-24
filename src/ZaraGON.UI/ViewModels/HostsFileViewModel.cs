@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ZaraGON.Core.Enums;
@@ -58,6 +59,10 @@ public sealed partial class HostsFileViewModel : ObservableObject
         }
     }
 
+    private static readonly Regex ValidHostnameRegex = new(
+        @"^[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?)*$",
+        RegexOptions.Compiled);
+
     [RelayCommand]
     private async Task AddEntryAsync()
     {
@@ -67,12 +72,19 @@ public sealed partial class HostsFileViewModel : ObservableObject
             return;
         }
 
+        var trimmed = NewHostname.Trim();
+        if (!ValidHostnameRegex.IsMatch(trimmed))
+        {
+            _dialogService.ShowWarning("Hostname yalnızca harf, rakam, tire (-) ve nokta (.) içerebilir. Boşluk ve özel karakter kullanılamaz.");
+            return;
+        }
+
         try
         {
             var entry = new HostEntry
             {
                 IpAddress = NewIpAddress,
-                Hostname = NewHostname.Trim()
+                Hostname = trimmed
             };
 
             await _hostsFileManager.AddEntryAsync(entry);

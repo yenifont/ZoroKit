@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text.RegularExpressions;
 using ZaraGON.Core.Constants;
 using ZaraGON.Core.Interfaces.Infrastructure;
 using ZaraGON.Core.Interfaces.Services;
@@ -16,6 +17,10 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
     private readonly List<string> _detectedSites = [];
     private readonly object _lock = new();
     private bool _isApplying;
+
+    private static readonly Regex ValidHostnameRegex = new(
+        @"^[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?)*$",
+        RegexOptions.Compiled);
 
     public event EventHandler<string>? SiteAdded;
     public event EventHandler<string>? SiteRemoved;
@@ -46,7 +51,19 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
         try
         {
             var config = await _configManager.LoadAsync(ct);
-            if (!config.AutoVirtualHosts) return;
+            if (!config.AutoVirtualHosts)
+            {
+                // Clean up stale auto.* files when feature is disabled
+                var sitesPath = Path.Combine(_basePath, Defaults.SitesEnabledDir);
+                if (Directory.Exists(sitesPath))
+                {
+                    foreach (var file in Directory.GetFiles(sitesPath, "auto.*.conf"))
+                    {
+                        try { _fileSystem.DeleteFile(file); } catch { }
+                    }
+                }
+                return;
+            }
 
             var wwwPath = Path.Combine(_basePath, config.DocumentRoot);
             _fileSystem.CreateDirectory(wwwPath);
@@ -54,11 +71,12 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
             var sitesDir = Path.Combine(_basePath, Defaults.SitesEnabledDir);
             _fileSystem.CreateDirectory(sitesDir);
 
-            // Scan for subdirectories
+            // Scan for subdirectories (skip names with spaces/invalid hostname chars)
             var dirs = Directory.Exists(wwwPath)
                 ? Directory.GetDirectories(wwwPath)
                     .Select(Path.GetFileName)
-                    .Where(n => !string.IsNullOrEmpty(n) && !n!.StartsWith('.'))
+                    .Where(n => !string.IsNullOrEmpty(n) && !n!.StartsWith('.')
+                                && ValidHostnameRegex.IsMatch(n))
                     .Select(n => n!)
                     .ToList()
                 : new List<string>();
@@ -142,6 +160,8 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
     public async Task EnsureVHostForHostnameAsync(string hostname, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(hostname)) return;
+        if (!ValidHostnameRegex.IsMatch(hostname))
+            throw new ArgumentException($"Geçersiz hostname: '{hostname}'. Hostname yalnızca harf, rakam, tire ve nokta içerebilir.");
 
         var config = await _configManager.LoadAsync(ct);
         var wwwPath = Path.Combine(_basePath, config.DocumentRoot);

@@ -1,3 +1,5 @@
+using System.Security.AccessControl;
+using System.Security.Principal;
 using ZaraGON.Application.ConfigGeneration;
 using ZaraGON.Core.Constants;
 using ZaraGON.Core.Enums;
@@ -81,6 +83,16 @@ public sealed class MariaDbService : IServiceController
                 await InitializeDataDirAsync(mysqldPath, ct);
             }
 
+            // Ensure data directory has write permissions for current user
+            EnsureDataDirPermissions(dataDir);
+
+            // Remove rogue my.ini from data dir (bootstrap leftover, conflicts with --defaults-file)
+            var rogueIni = Path.Combine(dataDir, "my.ini");
+            if (_fileSystem.FileExists(rogueIni))
+            {
+                try { _fileSystem.DeleteFile(rogueIni); } catch { /* best effort */ }
+            }
+
             // Generate config
             await GenerateConfigAsync(config, ct);
 
@@ -105,7 +117,13 @@ public sealed class MariaDbService : IServiceController
             }
 
             _processId = null;
-            throw new ServiceStartException("MariaDB", "Process exited immediately after start.");
+
+            // Read error log for meaningful error message
+            var errorDetail = ReadLastErrorLogLine();
+            throw new ServiceStartException("MariaDB",
+                string.IsNullOrEmpty(errorDetail)
+                    ? "Process exited immediately after start."
+                    : $"Process exited immediately: {errorDetail}");
         }
         catch (Exception) when (Status == ServiceStatus.Starting)
         {
@@ -291,9 +309,11 @@ public sealed class MariaDbService : IServiceController
 
         var dataDir = GetDataDir();
         var configDir = Path.Combine(_basePath, Defaults.MariaDbConfigDir);
+        var logDir = Path.Combine(_basePath, Defaults.LogDir);
 
         _fileSystem.CreateDirectory(dataDir);
         _fileSystem.CreateDirectory(configDir);
+        _fileSystem.CreateDirectory(logDir);
 
         var mariaDbSettings = new MariaDbSettings
         {
@@ -302,7 +322,7 @@ public sealed class MariaDbService : IServiceController
             MaxAllowedPacket = config.MariaDbMaxAllowedPacket
         };
 
-        var myIni = _configGenerator.Generate(active.InstallPath, dataDir, config.MySqlPort, mariaDbSettings);
+        var myIni = _configGenerator.Generate(active.InstallPath, dataDir, config.MySqlPort, logDir, mariaDbSettings);
         await _fileSystem.AtomicWriteAsync(GetConfigPath(), myIni, ct);
     }
 
@@ -320,6 +340,48 @@ public sealed class MariaDbService : IServiceController
                 && _fileSystem.GetDirectories(path).Length == 0;
         }
         catch { return true; }
+    }
+
+    private void EnsureDataDirPermissions(string dataDir)
+    {
+        try
+        {
+            var dirInfo = new DirectoryInfo(dataDir);
+            var security = dirInfo.GetAccessControl();
+            var currentUser = WindowsIdentity.GetCurrent().User;
+            if (currentUser == null) return;
+
+            security.AddAccessRule(new FileSystemAccessRule(
+                currentUser,
+                FileSystemRights.Modify | FileSystemRights.Synchronize,
+                InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
+                PropagationFlags.None,
+                AccessControlType.Allow));
+
+            dirInfo.SetAccessControl(security);
+        }
+        catch
+        {
+            /* best effort — may already have correct permissions */
+        }
+    }
+
+    private string? ReadLastErrorLogLine()
+    {
+        try
+        {
+            var logPath = Path.Combine(_basePath, Defaults.LogDir, "mariadb-error.log");
+            if (!_fileSystem.FileExists(logPath)) return null;
+
+            var lines = File.ReadAllLines(logPath);
+            for (int i = lines.Length - 1; i >= 0; i--)
+            {
+                if (lines[i].Contains("[ERROR]", StringComparison.OrdinalIgnoreCase))
+                    return lines[i];
+            }
+        }
+        catch { /* best effort */ }
+        return null;
     }
 
     private void SetStatus(ServiceStatus status)
