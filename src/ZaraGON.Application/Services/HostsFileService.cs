@@ -105,7 +105,32 @@ public sealed class HostsFileService : IHostsFileManager
         }
         catch (UnauthorizedAccessException)
         {
-            throw new HostsFileException("Administrator privileges required to modify the hosts file.");
+            // Direct write failed — fall back to elevated copy via UAC
+            await WriteHostsElevatedAsync(newContent, ct);
+        }
+    }
+
+    private async Task WriteHostsElevatedAsync(string content, CancellationToken ct)
+    {
+        var tempPath = Path.Combine(Path.GetTempPath(), $"zaragon_hosts_{Guid.NewGuid():N}.tmp");
+        try
+        {
+            await File.WriteAllTextAsync(tempPath, content, ct);
+            await _privilegeManager.RunElevatedAsync(
+                "cmd.exe",
+                $"/C copy /Y \"{tempPath}\" \"{HostsFileMarkers.HostsFilePath}\"");
+        }
+        catch (HostsFileException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new HostsFileException("Hosts dosyası güncellenemedi. Yönetici izni gerekli.", ex);
+        }
+        finally
+        {
+            try { File.Delete(tempPath); } catch { /* cleanup best-effort */ }
         }
     }
 

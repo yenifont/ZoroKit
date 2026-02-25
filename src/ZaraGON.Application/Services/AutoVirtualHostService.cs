@@ -213,9 +213,19 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
         var sitesDir = Path.Combine(_basePath, Defaults.SitesEnabledDir);
         _fileSystem.CreateDirectory(sitesDir);
         var docRoot = wwwPath.Replace('\\', '/');
-        var vhostConf = GenerateVHostConf(hostname, docRoot, config.ApachePort);
-        var confPath = Path.Combine(sitesDir, $"default.{hostname}.conf");
+
+        // 000- prefix ensures this is always the first VirtualHost (default catch-all)
+        // ServerAlias localhost ensures http://localhost/* is explicitly matched
+        var vhostConf = GenerateVHostConf(hostname, docRoot, config.ApachePort, "localhost");
+        var confPath = Path.Combine(sitesDir, $"000-default.{hostname}.conf");
         await _fileSystem.WriteAllTextAsync(confPath, vhostConf, ct);
+
+        // Clean up old naming convention
+        var oldConfPath = Path.Combine(sitesDir, $"default.{hostname}.conf");
+        if (_fileSystem.FileExists(oldConfPath))
+        {
+            try { _fileSystem.DeleteFile(oldConfPath); } catch { }
+        }
     }
 
     public async Task StartWatchingAsync(CancellationToken ct = default)
@@ -261,14 +271,19 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
         catch { /* best effort */ }
     }
 
-    private static string GenerateVHostConf(string hostname, string docRoot, int port)
+    private static string GenerateVHostConf(string hostname, string docRoot, int port, string? extraAliases = null)
     {
+        var aliasLine = string.IsNullOrEmpty(extraAliases)
+            ? $"ServerAlias *.{hostname}"
+            : $"ServerAlias *.{hostname} {extraAliases}";
+
         return $"""
             <VirtualHost *:{port}>
                 DocumentRoot "{docRoot}"
                 ServerName {hostname}
-                ServerAlias *.{hostname}
+                {aliasLine}
                 <Directory "{docRoot}">
+                    Options Indexes FollowSymLinks
                     AllowOverride All
                     Require all granted
                 </Directory>
@@ -286,6 +301,7 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
                 SSLCertificateFile "{certPath}"
                 SSLCertificateKeyFile "{keyPath}"
                 <Directory "{docRoot}">
+                    Options Indexes FollowSymLinks
                     AllowOverride All
                     Require all granted
                 </Directory>

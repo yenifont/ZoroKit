@@ -346,7 +346,7 @@ public sealed class ApacheService : IServiceController
         var httpdConf = _configGenerator.Generate(
             serverRoot, docRoot, config.ApachePort,
             phpModulePath, phpPath, logDir, vhostsPath,
-            config.AutoVirtualHosts ? sitesEnabledDir : null,
+            sitesEnabledDir,
             config.SslEnabled, config.ApacheSslPort, sslDir,
             aliasDir);
 
