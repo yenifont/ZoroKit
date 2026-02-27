@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>ZoroKit.Core</RootNamespace>
+    <AssemblyName>ZoroKit.Core</AssemblyName>
+  </PropertyGroup>
+</Project>

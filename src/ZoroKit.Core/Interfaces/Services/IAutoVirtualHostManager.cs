@@ -1,0 +1,20 @@
+namespace ZoroKit.Core.Interfaces.Services;
+
+public interface IAutoVirtualHostManager
+{
+    Task ScanAndApplyAsync(CancellationToken ct = default);
+    /// <summary>
+    /// Hostname (örn. migrations.test) için www klasörü ve Apache vhost oluşturur;
+    /// böylece tarayıcıda açıldığında localhost gibi çalışır.
+    /// </summary>
+    Task EnsureVHostForHostnameAsync(string hostname, CancellationToken ct = default);
+    /// <summary>
+    /// İlk kurulumda varsayılan zorokit.app host kaydı ve ana www vhost'unu ekler.
+    /// </summary>
+    Task EnsureDefaultZoroKitHostAsync(CancellationToken ct = default);
+    Task StartWatchingAsync(CancellationToken ct = default);
+    Task StopWatchingAsync();
+    IReadOnlyList<string> GetDetectedSites();
+    event EventHandler<string>? SiteAdded;
+    event EventHandler<string>? SiteRemoved;
+}

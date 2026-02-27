@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ZoroKit.Application/ZoroKit.Application.csproj" />
+    <Project Path="src/ZoroKit.Core/ZoroKit.Core.csproj" />
+    <Project Path="src/ZoroKit.Infrastructure/ZoroKit.Infrastructure.csproj" />
+    <Project Path="src/ZoroKit.UI/ZoroKit.UI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ZoroKit.Application.Tests/ZoroKit.Application.Tests.csproj" />
+  </Folder>
+</Solution>

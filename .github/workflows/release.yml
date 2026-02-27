@@ -20,7 +20,7 @@ jobs:
 
       - name: Publish
         run: |
-          dotnet publish src/ZaraGON.UI/ZaraGON.UI.csproj `
+          dotnet publish src/ZoroKit.UI/ZoroKit.UI.csproj `
             -c Release `
             -r win-x64 `
             --self-contained true `
@@ -36,14 +36,14 @@ jobs:
       - name: Build installer (Inno Setup)
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
-          path: installer/ZaraGON.iss
+          path: installer/ZoroKit.iss
           options: /O+
 
       - name: Get installer path
         id: installer
         run: |
-          $f = Get-ChildItem -Path installer/Output/ZaraGON-Setup-*.exe -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $f) { Write-Error "Kurulum paketi bulunamadi: installer/Output/ZaraGON-Setup-*.exe"; exit 1 }
+          $f = Get-ChildItem -Path installer/Output/ZoroKit-Setup-*.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $f) { Write-Error "Kurulum paketi bulunamadi: installer/Output/ZoroKit-Setup-*.exe"; exit 1 }
           echo "path=$($f.FullName)" >> $env:GITHUB_OUTPUT
 
       - name: Create GitHub Release
@@ -51,11 +51,11 @@ jobs:
         with:
           files: |
             ${{ steps.installer.outputs.path }}
-            publish/ZaraGON.exe
+            publish/ZoroKit.exe
           generate_release_notes: true
           body: |
-            **Kurulum (onemli):** `ZaraGON-Setup-*.exe` dosyasini indirip **yonetici olarak calistirin**. Bu kurulum:
-            - ZaraGON.exe'yi C:\ZaraGON icine kopyalar
+            **Kurulum (onemli):** `ZoroKit-Setup-*.exe` dosyasini indirip **yonetici olarak calistirin**. Bu kurulum:
+            - ZoroKit.exe'yi C:\ZoroKit icine kopyalar
             - Masaustu ve Baslat menusu kisayollarini olusturur
             - Program Ekle/Kaldir'a kaydeder
-            Sadece ZaraGON.exe indirirseniz kisayol ve Program Ekle Kaldir olusmaz.
+            Sadece ZoroKit.exe indirirseniz kisayol ve Program Ekle Kaldir olusmaz.

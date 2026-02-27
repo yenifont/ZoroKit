@@ -5,7 +5,7 @@ param([string]$Version = "1.0.0")
 Add-Type -AssemblyName System.Drawing
 
 $root = Split-Path $PSScriptRoot -Parent
-$appPng = Join-Path $root "src\ZaraGON.UI\Resources\app.png"
+$appPng = Join-Path $root "src\ZoroKit.UI\Resources\app.png"
 $outDir = $PSScriptRoot
 $versionText = if ($Version -match "^\d") { "v$Version" } else { $Version }
 
@@ -39,7 +39,7 @@ $textBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::White)
 $sf = New-Object System.Drawing.StringFormat
 $sf.Alignment = [System.Drawing.StringAlignment]::Center
 $rect = New-Object System.Drawing.RectangleF(0, ($y + $logoSize + 12), $w, 30)
-$g.DrawString("ZaraGON", $font, $textBrush, $rect, $sf)
+$g.DrawString("ZoroKit", $font, $textBrush, $rect, $sf)
 
 # Version text (parametreden; CI'da tag ile guncellenir)
 $fontSmall = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Regular)

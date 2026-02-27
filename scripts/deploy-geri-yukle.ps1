@@ -1,9 +1,9 @@
-# ZaraGON: deploy klasorundeki verileri kurulum kokune geri kopyala
-# Kullanim: .\deploy-geri-yukle.ps1 -DeployRoot "C:\ZaraGON\deploy" -ZaragonRoot "C:\ZaraGON"
+# ZoroKit: deploy klasorundeki verileri kurulum kokune geri kopyala
+# Kullanim: .\deploy-geri-yukle.ps1 -DeployRoot "C:\ZoroKit\deploy" -ZoroKitRoot "C:\ZoroKit"
 
 param(
     [string]$DeployRoot = (Join-Path (Get-Location).Path "deploy"),
-    [string]$ZaragonRoot = "C:\ZaraGON"
+    [string]$ZoroKitRoot = "C:\ZoroKit"
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,7 +11,7 @@ $ErrorActionPreference = "Stop"
 $Klasorler = @("mariadb", "config", "www", "apps", "backups", "logs")
 
 Write-Host "Deploy (kaynak): $DeployRoot" -ForegroundColor Cyan
-Write-Host "ZaraGON (hedef): $ZaragonRoot" -ForegroundColor Cyan
+Write-Host "ZoroKit (hedef): $ZoroKitRoot" -ForegroundColor Cyan
 Write-Host ""
 
 if (-not (Test-Path $DeployRoot)) {
@@ -20,7 +20,7 @@ if (-not (Test-Path $DeployRoot)) {
 
 foreach ($dir in $Klasorler) {
     $kaynak = Join-Path $DeployRoot $dir
-    $hedef  = Join-Path $ZaragonRoot $dir
+    $hedef  = Join-Path $ZoroKitRoot $dir
 
     if (Test-Path $kaynak) {
         Write-Host "Geri yukleniyor: $dir\ ..." -ForegroundColor Yellow

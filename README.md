@@ -19,7 +19,7 @@
 
 ## About
 
-ZoroKit is a native Windows application for managing a local web development stack. It replaces tools like XAMPP, WampServer, and Laragon with a modern WPF interface, automatic configuration, and multi-version support for all components.
+ZoroKit is a native Windows application for managing a local web development stack. Built with a modern WPF interface, it provides automatic configuration and multi-version support for all components out of the box.
 
 No manual config editing. No terminal commands. Install, click Start, and begin coding.
 

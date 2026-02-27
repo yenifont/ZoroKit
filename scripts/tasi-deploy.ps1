@@ -1,24 +1,24 @@
-# ZaraGON: Veritabani ve ayarlari yollari koruyarak deploy klasorune kopyala
+# ZoroKit: Veritabani ve ayarlari yollari koruyarak deploy klasorune kopyala
 # Kullanim:
-#   CD C:\ZaraGON
-#   powershell -ExecutionPolicy Bypass -File "D:\Zoragon\scripts\tasi-deploy.ps1" -ZaragonRoot "C:\ZaraGON"
-# veya ZaraGON icinde:  .\tasi-deploy.ps1 -ZaragonRoot "C:\ZaraGON"
+#   CD C:\ZoroKit
+#   powershell -ExecutionPolicy Bypass -File "D:\Zoragon\scripts\tasi-deploy.ps1" -ZoroKitRoot "C:\ZoroKit"
+# veya ZoroKit icinde:  .\tasi-deploy.ps1 -ZoroKitRoot "C:\ZoroKit"
 
 param(
     [Parameter(Mandatory=$false)]
-    [string]$ZaragonRoot = "",
+    [string]$ZoroKitRoot = "",
     [string]$DeployRoot = ""
 )
 
-if ([string]::IsNullOrWhiteSpace($ZaragonRoot)) {
-    $ZaragonRoot = (Get-Location).Path
+if ([string]::IsNullOrWhiteSpace($ZoroKitRoot)) {
+    $ZoroKitRoot = (Get-Location).Path
 }
 if ([string]::IsNullOrWhiteSpace($DeployRoot)) {
-    $DeployRoot = Join-Path $ZaragonRoot "deploy"
+    $DeployRoot = Join-Path $ZoroKitRoot "deploy"
 }
 
 $ErrorActionPreference = "Stop"
-Write-Host "ZaraGON tasi-deploy: DB + config + www yollari korunur." -ForegroundColor Cyan
+Write-Host "ZoroKit tasi-deploy: DB + config + www yollari korunur." -ForegroundColor Cyan
 
 # Tasinacak klasorler (yollar korunur: deploy\mariadb, deploy\config, ...)
 $Klasorler = @(
@@ -30,18 +30,18 @@ $Klasorler = @(
     "logs"       # Opsiyonel: hata loglari
 )
 
-Write-Host "ZaraGON kok: $ZaragonRoot" -ForegroundColor Cyan
+Write-Host "ZoroKit kok: $ZoroKitRoot" -ForegroundColor Cyan
 Write-Host "Hedef (deploy): $DeployRoot" -ForegroundColor Cyan
 Write-Host ""
 
-if (-not (Test-Path $ZaragonRoot)) {
-    Write-Error "ZaraGON kok bulunamadi: $ZaragonRoot"
+if (-not (Test-Path $ZoroKitRoot)) {
+    Write-Error "ZoroKit kok bulunamadi: $ZoroKitRoot"
 }
 
 New-Item -ItemType Directory -Path $DeployRoot -Force | Out-Null
 
 foreach ($dir in $Klasorler) {
-    $kaynak = Join-Path $ZaragonRoot $dir
+    $kaynak = Join-Path $ZoroKitRoot $dir
     $hedef  = Join-Path $DeployRoot $dir
 
     if (Test-Path $kaynak) {
@@ -58,4 +58,4 @@ foreach ($dir in $Klasorler) {
 
 Write-Host ""
 Write-Host "Tamamlandi. Yollar korundu: deploy\mariadb, deploy\config, deploy\www, ..." -ForegroundColor Green
-Write-Host "Programi yeniden kurduktan sonra bu klasorleri C:\ZaraGON (veya yeni kurulum yoluna) geri kopyalayabilirsiniz." -ForegroundColor Cyan
+Write-Host "Programi yeniden kurduktan sonra bu klasorleri C:\ZoroKit (veya yeni kurulum yoluna) geri kopyalayabilirsiniz." -ForegroundColor Cyan
