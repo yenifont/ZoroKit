@@ -19,6 +19,8 @@ public sealed partial class PhpViewModel : ObservableObject
     private readonly IPhpExtensionManager _extensionManager;
     private readonly IConfigurationManager _configManager;
     private readonly OrchestratorService _orchestrator;
+    private readonly PhpService _phpService;
+    private readonly IServiceController _apacheController;
     private readonly IVcRedistChecker _vcRedistChecker;
     private readonly DialogService _dialogService;
     private readonly ToastService _toastService;
@@ -82,6 +84,8 @@ public sealed partial class PhpViewModel : ObservableObject
         IPhpExtensionManager extensionManager,
         IConfigurationManager configManager,
         OrchestratorService orchestrator,
+        PhpService phpService,
+        IServiceController apacheController,
         IVcRedistChecker vcRedistChecker,
         DialogService dialogService,
         ToastService toastService,
@@ -91,6 +95,8 @@ public sealed partial class PhpViewModel : ObservableObject
         _extensionManager = extensionManager;
         _configManager = configManager;
         _orchestrator = orchestrator;
+        _phpService = phpService;
+        _apacheController = apacheController;
         _vcRedistChecker = vcRedistChecker;
         _dialogService = dialogService;
         _toastService = toastService;
@@ -154,14 +160,32 @@ public sealed partial class PhpViewModel : ObservableObject
             config.PhpDateTimezone = PhpDateTimezone;
             await _configManager.SaveAsync(config);
 
-            // Regenerate php.ini and restart Apache
+            // Update only the changed settings in php.ini (preserves user edits)
             if (!string.IsNullOrEmpty(config.ActivePhpVersion) && config.ActivePhpVersion != "None")
             {
-                await _orchestrator.SwitchPhpVersionAsync(config.ActivePhpVersion);
+                var phpSettings = new PhpSettings
+                {
+                    MemoryLimit = PhpMemoryLimit,
+                    UploadMaxFilesize = PhpUploadMaxFilesize,
+                    PostMaxSize = PhpPostMaxSize,
+                    MaxExecutionTime = PhpMaxExecutionTime,
+                    MaxInputTime = PhpMaxInputTime,
+                    MaxFileUploads = PhpMaxFileUploads,
+                    MaxInputVars = PhpMaxInputVars,
+                    DisplayErrors = PhpDisplayErrors,
+                    ErrorReporting = PhpErrorReporting,
+                    DateTimezone = PhpDateTimezone
+                };
+                await _phpService.UpdatePhpSettingsInIniAsync(config.ActivePhpVersion, phpSettings);
+
+                // Restart Apache if running
+                var status = await _apacheController.GetStatusAsync();
+                if (status == ServiceStatus.Running)
+                    await _apacheController.RestartAsync();
             }
 
-            StatusMessage = "PHP ayarlar\u0131 kaydedildi ve uyguland\u0131";
-            _toastService.ShowSuccess("PHP ayarlar\u0131 kaydedildi ve uyguland\u0131");
+            StatusMessage = "PHP ayarları kaydedildi ve uygulandı";
+            _toastService.ShowSuccess("PHP ayarları kaydedildi ve uygulandı");
         }
         catch (Exception ex)
         {

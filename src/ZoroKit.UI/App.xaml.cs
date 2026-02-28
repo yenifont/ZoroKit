@@ -777,6 +777,8 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<IPhpExtensionManager>(),
                 sp.GetRequiredService<IConfigurationManager>(),
                 sp.GetRequiredService<OrchestratorService>(),
+                sp.GetRequiredService<PhpService>(),
+                sp.GetRequiredService<IServiceController>(),
                 sp.GetRequiredService<IVcRedistChecker>(),
                 sp.GetRequiredService<DialogService>(),
                 sp.GetRequiredService<ToastService>(),

@@ -394,8 +394,9 @@ public sealed class OrchestratorService
         config.ActivePhpVersion = version;
         await _configManager.SaveAsync(config, ct);
 
-        // Regenerate PHP ini
-        await _phpService.GeneratePhpIniAsync(version, ct: ct);
+        // Update extension_dir + cleanup invalid extensions (preserves user edits)
+        // Falls back to full generation if php.ini doesn't exist yet
+        await _phpService.UpdateExtensionDirInIniAsync(version, ct);
 
         // Update composer.bat with new PHP path
         try { await RegenerateComposerBatAsync(ct); } catch { }

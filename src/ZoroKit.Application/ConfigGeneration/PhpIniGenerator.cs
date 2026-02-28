@@ -36,7 +36,7 @@ public sealed class PhpIniGenerator
 
             [PHP]
             engine = On
-            short_open_tag = Off
+            short_open_tag = On
             precision = 14
             output_buffering = 4096
             zlib.output_compression = Off
