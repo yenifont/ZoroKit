@@ -16,6 +16,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly ISslCertificateManager _sslManager;
     private readonly DialogService _dialogService;
     private readonly ToastService _toastService;
+    private readonly DashboardViewModel _dashboardViewModel;
     private readonly string _basePath;
 
     [ObservableProperty]
@@ -63,6 +64,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         ISslCertificateManager sslManager,
         DialogService dialogService,
         ToastService toastService,
+        DashboardViewModel dashboardViewModel,
         string basePath)
     {
         _configManager = configManager;
@@ -70,6 +72,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _sslManager = sslManager;
         _dialogService = dialogService;
         _toastService = toastService;
+        _dashboardViewModel = dashboardViewModel;
         _basePath = basePath;
         _ = LoadAsync();
     }
@@ -117,6 +120,10 @@ public sealed partial class SettingsViewModel : ObservableObject
             config.AddToSystemPath = AddToSystemPath;
             await _configManager.SaveAsync(config);
             await _orchestrator.SyncAllConfigsAsync();
+
+            // Dashboard'u güncelle (port değişiklikleri için)
+            _dashboardViewModel.ApachePort = ApachePort;
+            _dashboardViewModel.MysqlPort = MysqlPort;
 
             // Handle Windows Startup toggle
             if (oldStartup != RunOnWindowsStartup)

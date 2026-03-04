@@ -790,6 +790,7 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<ISslCertificateManager>(),
                 sp.GetRequiredService<DialogService>(),
                 sp.GetRequiredService<ToastService>(),
+                sp.GetRequiredService<DashboardViewModel>(),
                 basePath));
         services.AddTransient<HostsFileViewModel>();
         services.AddSingleton<LogViewModel>();
@@ -841,6 +842,9 @@ public partial class App : System.Windows.Application
 
         if (_currentIconHandle != IntPtr.Zero)
             DestroyIcon(_currentIconHandle);
+
+        // Port monitor timer'ını durdur
+        try { _serviceProvider?.GetService<MainViewModel>()?.StopTimer(); } catch { }
 
         // Tüneli kapat
         try { _serviceProvider?.GetService<DashboardViewModel>()?.StopTunnel(); } catch { }
