@@ -5,7 +5,7 @@
 ; Temiz kaldirma: [Code] + [UninstallRun] ile surecler durdurulur, hosts temizlenir, kurulum dizini silinir.
 
 #define MyAppName "ZoroKit"
-#define MyAppVersion "1.0.12"
+#define MyAppVersion "1.0.19"
 #define MyAppPublisher "ZoroKit"
 #define MyAppURL "https://github.com/ZoroKit"
 #define MyAppExeName "ZoroKit.exe"
