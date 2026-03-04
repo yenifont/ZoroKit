@@ -112,10 +112,18 @@
                                          Fill="{Binding MariaDbStatus, Converter={StaticResource StatusColorConverter}}"
                                          VerticalAlignment="Center" />
                             </StackPanel>
-                            <TextBlock FontSize="11" Foreground="{StaticResource MutedTextBrush}" Margin="0,2,0,0">
-                                <Run Text="v" /><Run Text="{Binding ActiveMariaDbVersion, Mode=OneWay}" />
-                                <Run Text=" &#183; Port " /><Run Text="{Binding MysqlPort, Mode=OneWay}" />
-                            </TextBlock>
+                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                <TextBlock FontSize="11" Foreground="{StaticResource MutedTextBrush}">
+                                    <Run Text="v" /><Run Text="{Binding ActiveMariaDbVersion, Mode=OneWay}" />
+                                    <Run Text=" &#183; Port " /><Run Text="{Binding MysqlPort, Mode=OneWay}" />
+                                </TextBlock>
+                                <!-- Port Uyarısı -->
+                                <Border Background="#FEF3C7" CornerRadius="4" Padding="5,1" Margin="6,0,0,0"
+                                        Visibility="{Binding IsMariaDbPortNonStandard, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        ToolTip="Web uygulamalarınız standart port 3306 bekliyor. Bağlantı hatası alabilirsiniz.">
+                                    <TextBlock Text="⚠️ Standart değil!" FontSize="9.5" FontWeight="Medium" Foreground="#92400E" />
+                                </Border>
+                            </StackPanel>
                         </StackPanel>
                     </DockPanel>
                 </Border>

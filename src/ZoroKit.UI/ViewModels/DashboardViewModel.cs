@@ -71,7 +71,10 @@ public sealed partial class DashboardViewModel : ObservableObject
     private int _apachePort = 80;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsMariaDbPortNonStandard))]
     private int _mysqlPort = 3306;
+
+    public bool IsMariaDbPortNonStandard => MysqlPort != 3306;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanStartApache))]
@@ -759,6 +762,20 @@ public sealed partial class DashboardViewModel : ObservableObject
             }
             catch { /* VC++ check failed, skip */ }
 
+            // Check MariaDB Standard Port
+            if (config.MySqlPort != 3306)
+            {
+                DetectedIssues.Add(new QuickFix
+                {
+                    Title = "MariaDB Standart Olmayan Port",
+                    Description = $"MariaDB port {config.MySqlPort} kullanıyor (standart: 3306). Web uygulamaları bağlanamayabilir.",
+                    IconKind = "DatabaseAlert",
+                    Category = "mariadb_port",
+                    IsDetected = true,
+                    DetectionDetail = config.MySqlPort.ToString()
+                });
+            }
+
             if (DetectedIssues.Count == 0)
                 StatusMessage = "Sorun bulunamadı - yapılandırma iyi görünüyor!";
             else
@@ -802,6 +819,25 @@ public sealed partial class DashboardViewModel : ObservableObject
                     await _vcRedistChecker.InstallAsync();
                     StatusMessage = "VC++ Runtime kuruldu";
                     _toastService.ShowSuccess("VC++ Runtime başarıyla kuruldu");
+                    await ScanForIssuesAsync();
+                    return;
+                case "mariadb_port":
+                    config.MySqlPort = 3306;
+                    await _configManager.SaveAsync(config);
+                    MysqlPort = 3306; // Dashboard'u güncelle
+                    await _orchestrator.SyncAllConfigsAsync();
+
+                    // MariaDB çalışıyorsa yeniden başlat
+                    if (IsMariaDbRunning)
+                    {
+                        StatusMessage = "MariaDB port 3306'ya alınıyor...";
+                        await _mariaDbController.StopAsync();
+                        await Task.Delay(1000);
+                        await _mariaDbController.StartAsync();
+                        StatusMessage = "MariaDB port 3306'da başlatıldı";
+                    }
+
+                    _toastService.ShowSuccess("MariaDB port 3306'ya ayarlandı");
                     await ScanForIssuesAsync();
                     return;
                 default:

@@ -44,9 +44,10 @@ public sealed class HealthCheckerService : IHealthChecker
         var mariaDbBinaryTask = CheckBinaryAsync(ServiceType.MariaDb, "MariaDB Binary", ct);
         var mariaDbConfigTask = CheckMariaDbConfigAsync(ct);
         var vcRedistTask = CheckVcRedistAsync(config.ActivePhpVersion, ct);
+        var mariaDbStandardPortTask = CheckMariaDbStandardPortAsync(config.MySqlPort, ct);
 
         await Task.WhenAll(apachePortTask, apacheBinaryTask, phpBinaryTask,
-            apacheConfigTask, mariaDbPortTask, mariaDbBinaryTask, mariaDbConfigTask, vcRedistTask);
+            apacheConfigTask, mariaDbPortTask, mariaDbBinaryTask, mariaDbConfigTask, vcRedistTask, mariaDbStandardPortTask);
 
         return
         [
@@ -57,7 +58,8 @@ public sealed class HealthCheckerService : IHealthChecker
             await mariaDbPortTask,
             await mariaDbBinaryTask,
             await mariaDbConfigTask,
-            await vcRedistTask
+            await vcRedistTask,
+            await mariaDbStandardPortTask
         ];
     }
 
@@ -197,6 +199,21 @@ public sealed class HealthCheckerService : IHealthChecker
                 Message = "VC++ Redistributable durumu kontrol edilemedi"
             };
         }
+    }
+
+    private Task<HealthCheckResult> CheckMariaDbStandardPortAsync(int currentPort, CancellationToken ct = default)
+    {
+        const int standardPort = 3306;
+        var isStandard = currentPort == standardPort;
+
+        return Task.FromResult(new HealthCheckResult
+        {
+            CheckName = "MariaDB Port Standard",
+            IsHealthy = isStandard,
+            Message = isStandard
+                ? $"Port {standardPort} (standart)"
+                : $"Port {currentPort} kullanılıyor (standart: {standardPort}). Web uygulamaları bağlanamayabilir."
+        });
     }
 
     public Task<HealthCheckResult> CheckConfigAsync(string configPath, CancellationToken ct = default)
