@@ -1406,4 +1406,74 @@ public sealed partial class DashboardViewModel : ObservableObject
         }
         catch { /* health check failed */ }
     }
+
+    [RelayCommand]
+    private async Task ClearApachePortAsync()
+    {
+        try
+        {
+            var config = await _configManager.LoadAsync();
+            var port = config.ApachePort;
+
+            var conflict = await _portManager.GetPortConflictAsync(port);
+            if (conflict == null)
+            {
+                _toastService.ShowInfo($"Port {port} zaten boş");
+                return;
+            }
+
+            var confirmed = _dialogService.Confirm(
+                $"Port {port} şu process tarafından kullanılıyor:\n\n" +
+                $"{conflict.ProcessName} (PID: {conflict.ProcessId})\n\n" +
+                $"Bu process'i sonlandırmak istiyor musunuz?",
+                "Port Temizle");
+
+            if (!confirmed) return;
+
+            await _portManager.KillProcessOnPortAsync(port);
+            _toastService.ShowSuccess($"Port {port} temizlendi");
+
+            // Apache status'ü güncelle
+            await _apacheController.GetStatusAsync();
+        }
+        catch (Exception ex)
+        {
+            _toastService.ShowError($"Port temizlenemedi: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task ClearMariaDbPortAsync()
+    {
+        try
+        {
+            var config = await _configManager.LoadAsync();
+            var port = config.MySqlPort;
+
+            var conflict = await _portManager.GetPortConflictAsync(port);
+            if (conflict == null)
+            {
+                _toastService.ShowInfo($"Port {port} zaten boş");
+                return;
+            }
+
+            var confirmed = _dialogService.Confirm(
+                $"Port {port} şu process tarafından kullanılıyor:\n\n" +
+                $"{conflict.ProcessName} (PID: {conflict.ProcessId})\n\n" +
+                $"Bu process'i sonlandırmak istiyor musunuz?",
+                "Port Temizle");
+
+            if (!confirmed) return;
+
+            await _portManager.KillProcessOnPortAsync(port);
+            _toastService.ShowSuccess($"Port {port} temizlendi");
+
+            // MariaDB status'ü güncelle
+            await _mariaDbController.GetStatusAsync();
+        }
+        catch (Exception ex)
+        {
+            _toastService.ShowError($"Port temizlenemedi: {ex.Message}");
+        }
+    }
 }

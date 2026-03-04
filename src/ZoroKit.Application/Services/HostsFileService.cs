@@ -63,19 +63,35 @@ public sealed class HostsFileService : IHostsFileManager
 
         // Remove existing ZoroKit section
         var lines = content.Split('\n').Select(line => line.TrimEnd('\r')).ToList();
-        int startIdx = -1, endIdx = -1;
 
-        for (int i = 0; i < lines.Count; i++)
+        // Remove ALL ZoroKit sections (in case of duplicates from previous bugs)
+        while (true)
         {
-            if (lines[i].TrimEnd('\r').Trim() == HostsFileMarkers.StartMarker)
-                startIdx = i;
-            if (lines[i].TrimEnd('\r').Trim() == HostsFileMarkers.EndMarker)
-                endIdx = i;
-        }
+            int startIdx = -1, endIdx = -1;
 
-        if (startIdx >= 0 && endIdx >= startIdx)
-        {
-            lines.RemoveRange(startIdx, endIdx - startIdx + 1);
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var trimmed = lines[i].Trim();
+                if (trimmed == HostsFileMarkers.StartMarker)
+                {
+                    startIdx = i;
+                }
+                else if (trimmed == HostsFileMarkers.EndMarker && startIdx >= 0)
+                {
+                    endIdx = i;
+                    break; // İlk tam section bulundu
+                }
+            }
+
+            if (startIdx >= 0 && endIdx >= startIdx)
+            {
+                lines.RemoveRange(startIdx, endIdx - startIdx + 1);
+                // Döngü devam eder, başka section varsa o da silinir
+            }
+            else
+            {
+                break; // Daha fazla section yok
+            }
         }
 
         // Remove trailing empty lines
