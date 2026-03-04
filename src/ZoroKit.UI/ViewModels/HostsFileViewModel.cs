@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ZoroKit.Core.Constants;
 using ZoroKit.Core.Enums;
 using ZoroKit.Core.Interfaces.Services;
 using ZoroKit.Core.Models;
@@ -125,6 +127,27 @@ public sealed partial class HostsFileViewModel : ObservableObject
         catch (Exception ex)
         {
             _dialogService.ShowError(ex.Message, "Kayıt Kaldırılamadı");
+        }
+    }
+
+    [RelayCommand]
+    private void OpenHostsFile()
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "notepad.exe",
+                Arguments = HostsFileMarkers.HostsFilePath,
+                UseShellExecute = true,
+                Verb = "runas" // Admin olarak aç
+            };
+            Process.Start(startInfo)?.Dispose();
+            StatusMessage = "Hosts dosyası Notepad'de açıldı";
+        }
+        catch (Exception ex)
+        {
+            _dialogService.ShowError($"Hosts dosyası açılamadı: {ex.Message}", "Hata");
         }
     }
 }

@@ -346,19 +346,49 @@ public sealed class MariaDbService : IServiceController
     {
         try
         {
-            var dirInfo = new DirectoryInfo(dataDir);
-            var security = dirInfo.GetAccessControl();
             var currentUser = WindowsIdentity.GetCurrent().User;
             if (currentUser == null) return;
 
-            security.AddAccessRule(new FileSystemAccessRule(
+            var rule = new FileSystemAccessRule(
                 currentUser,
                 FileSystemRights.Modify | FileSystemRights.Synchronize,
                 InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
                 PropagationFlags.None,
-                AccessControlType.Allow));
+                AccessControlType.Allow);
 
-            dirInfo.SetAccessControl(security);
+            // Apply to data directory
+            var dirInfo = new DirectoryInfo(dataDir);
+            var dirSecurity = dirInfo.GetAccessControl();
+            dirSecurity.AddAccessRule(rule);
+            dirInfo.SetAccessControl(dirSecurity);
+
+            // Apply to all existing files and subdirectories recursively
+            foreach (var file in Directory.GetFiles(dataDir, "*", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    var fileInfo = new FileInfo(file);
+                    var fileSecurity = fileInfo.GetAccessControl();
+                    fileSecurity.AddAccessRule(new FileSystemAccessRule(
+                        currentUser,
+                        FileSystemRights.Modify | FileSystemRights.Synchronize,
+                        AccessControlType.Allow));
+                    fileInfo.SetAccessControl(fileSecurity);
+                }
+                catch { /* skip files we can't modify */ }
+            }
+
+            foreach (var subDir in Directory.GetDirectories(dataDir, "*", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    var subDirInfo = new DirectoryInfo(subDir);
+                    var subDirSecurity = subDirInfo.GetAccessControl();
+                    subDirSecurity.AddAccessRule(rule);
+                    subDirInfo.SetAccessControl(subDirSecurity);
+                }
+                catch { /* skip dirs we can't modify */ }
+            }
         }
         catch
         {

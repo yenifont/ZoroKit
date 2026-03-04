@@ -62,7 +62,7 @@ public sealed class HostsFileService : IHostsFileManager
         var content = await _fileSystem.ReadAllTextAsync(HostsFileMarkers.HostsFilePath, ct);
 
         // Remove existing ZoroKit section
-        var lines = content.Split('\n').ToList();
+        var lines = content.Split('\n').Select(line => line.TrimEnd('\r')).ToList();
         int startIdx = -1, endIdx = -1;
 
         for (int i = 0; i < lines.Count; i++)

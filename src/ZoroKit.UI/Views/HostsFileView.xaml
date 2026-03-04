@@ -62,6 +62,15 @@
             <Border Style="{StaticResource CardStyle}" Padding="14,12">
                 <StackPanel>
                     <DockPanel Margin="0,0,0,10">
+                        <Button Style="{StaticResource SoftButtonStyle}"
+                                Command="{Binding OpenHostsFileCommand}" DockPanel.Dock="Right"
+                                Padding="12,4" FontSize="11" Margin="8,0,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FileEdit" Width="13" Height="13"
+                                                        Margin="0,0,5,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Dosyay&#305; A&#231;" FontSize="11" />
+                            </StackPanel>
+                        </Button>
                         <materialDesign:PackIcon Kind="FormatListBulleted" Width="15" Height="15"
                                                  Foreground="{StaticResource PrimaryBrush}" Margin="0,0,8,0"
                                                  VerticalAlignment="Center" />
