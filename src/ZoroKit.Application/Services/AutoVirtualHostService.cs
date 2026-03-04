@@ -157,7 +157,7 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
         }
     }
 
-    public async Task EnsureVHostForHostnameAsync(string hostname, CancellationToken ct = default)
+    public async Task EnsureVHostForHostnameAsync(string hostname, string? subFolder = null, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(hostname)) return;
         if (!ValidHostnameRegex.IsMatch(hostname))
@@ -167,15 +167,33 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
         var wwwPath = Path.Combine(_basePath, config.DocumentRoot);
         _fileSystem.CreateDirectory(wwwPath);
 
-        var tld = config.VirtualHostTld;
-        var siteName = hostname.EndsWith(tld, StringComparison.OrdinalIgnoreCase)
-            ? hostname[..^tld.Length]
-            : hostname.Split('.')[0];
-        if (string.IsNullOrEmpty(siteName)) siteName = hostname.Replace(".", "_");
+        string siteDir;
 
-        var siteDir = Path.Combine(wwwPath, siteName);
-        if (!_fileSystem.DirectoryExists(siteDir))
-            _fileSystem.CreateDirectory(siteDir);
+        // Alt klasör belirtilmişse onu kullan, yoksa hostname'den türet
+        if (!string.IsNullOrWhiteSpace(subFolder))
+        {
+            siteDir = Path.Combine(wwwPath, subFolder.Trim());
+
+            // Alt klasör var mı kontrol et
+            if (!_fileSystem.DirectoryExists(siteDir))
+            {
+                throw new DirectoryNotFoundException(
+                    $"Belirtilen alt klasör bulunamadı: '{subFolder}'. Lütfen önce www/{subFolder} klasörünü oluşturun.");
+            }
+        }
+        else
+        {
+            // Hostname'den klasör adı türet (mevcut davranış)
+            var tld = config.VirtualHostTld;
+            var siteName = hostname.EndsWith(tld, StringComparison.OrdinalIgnoreCase)
+                ? hostname[..^tld.Length]
+                : hostname.Split('.')[0];
+            if (string.IsNullOrEmpty(siteName)) siteName = hostname.Replace(".", "_");
+
+            siteDir = Path.Combine(wwwPath, siteName);
+            if (!_fileSystem.DirectoryExists(siteDir))
+                _fileSystem.CreateDirectory(siteDir);
+        }
 
         if (config.AutoVirtualHosts)
         {

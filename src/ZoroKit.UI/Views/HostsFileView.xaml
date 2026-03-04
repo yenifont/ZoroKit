@@ -31,30 +31,56 @@
                         <TextBlock Text="Yeni Kay&#305;t Ekle" FontSize="13" FontWeight="SemiBold"
                                    Foreground="{StaticResource PrimaryTextBrush}" VerticalAlignment="Center" />
                     </DockPanel>
-                    <DockPanel>
-                        <Button Content="Ekle" Style="{StaticResource SuccessButtonStyle}"
-                                Command="{Binding AddEntryCommand}" DockPanel.Dock="Right"
-                                Margin="10,0,0,0" Padding="14,5" FontSize="11.5" />
-                        <Grid>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="8" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- IP ve Hostname -->
+                        <DockPanel Grid.Row="0">
+                            <Button Content="Ekle" Style="{StaticResource SuccessButtonStyle}"
+                                    Command="{Binding AddEntryCommand}" DockPanel.Dock="Right"
+                                    Margin="10,0,0,0" Padding="14,5" FontSize="11.5" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="140" />
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="IP" Grid.Column="0" Foreground="{StaticResource SecondaryTextBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11.5" />
+                                <TextBox Text="{Binding NewIpAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1"
+                                         Style="{StaticResource InputTextBoxStyle}" FontSize="11.5"
+                                         Padding="8,5" BorderThickness="0" />
+                                <TextBlock Text="Hostname" Grid.Column="3" Foreground="{StaticResource SecondaryTextBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11.5" />
+                                <TextBox Text="{Binding NewHostname, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="4"
+                                         Style="{StaticResource InputTextBoxStyle}" FontSize="11.5"
+                                         Padding="8,5" BorderThickness="0" />
+                            </Grid>
+                        </DockPanel>
+
+                        <!-- Alt Klasör (Opsiyonel) -->
+                        <Grid Grid.Row="2">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="140" />
-                                <ColumnDefinition Width="16" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="IP" Grid.Column="0" Foreground="{StaticResource SecondaryTextBrush}"
-                                       VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11.5" />
-                            <TextBox Text="{Binding NewIpAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1"
+                            <TextBlock Grid.Column="0" Foreground="{StaticResource SecondaryTextBrush}"
+                                       VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11.5">
+                                <Run Text="Alt Klasör" />
+                                <Run Text="(opsiyonel)" Foreground="{StaticResource MutedTextBrush}" FontSize="10.5" />
+                            </TextBlock>
+                            <TextBox Text="{Binding NewSubFolder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1"
                                      Style="{StaticResource InputTextBoxStyle}" FontSize="11.5"
-                                     Padding="8,5" BorderThickness="0" />
-                            <TextBlock Text="Hostname" Grid.Column="3" Foreground="{StaticResource SecondaryTextBrush}"
-                                       VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11.5" />
-                            <TextBox Text="{Binding NewHostname, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="4"
-                                     Style="{StaticResource InputTextBoxStyle}" FontSize="11.5"
-                                     Padding="8,5" BorderThickness="0" />
+                                     Padding="8,5" BorderThickness="0"
+                                     materialDesign:HintAssist.Hint="örn: zoro (boş ise hostname kullanılır)" />
                         </Grid>
-                    </DockPanel>
+                    </Grid>
                 </StackPanel>
             </Border>
 

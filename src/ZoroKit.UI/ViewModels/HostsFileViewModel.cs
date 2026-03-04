@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -23,6 +24,9 @@ public sealed partial class HostsFileViewModel : ObservableObject
 
     [ObservableProperty]
     private string _newHostname = string.Empty;
+
+    [ObservableProperty]
+    private string _newSubFolder = string.Empty;
 
     [ObservableProperty]
     private string _statusMessage = string.Empty;
@@ -93,10 +97,17 @@ public sealed partial class HostsFileViewModel : ObservableObject
 
             try
             {
-                await _autoVHostManager.EnsureVHostForHostnameAsync(entry.Hostname);
+                var subFolder = string.IsNullOrWhiteSpace(NewSubFolder) ? null : NewSubFolder.Trim();
+                await _autoVHostManager.EnsureVHostForHostnameAsync(entry.Hostname, subFolder);
                 var status = await _apacheController.GetStatusAsync();
                 if (status == ServiceStatus.Running)
                     await _apacheController.ReloadAsync();
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                // Alt klasör bulunamadı hatası - kullanıcıya göster
+                _dialogService.ShowError(ex.Message, "Klasör Bulunamadı");
+                return;
             }
             catch
             {
@@ -104,6 +115,7 @@ public sealed partial class HostsFileViewModel : ObservableObject
             }
 
             NewHostname = string.Empty;
+            NewSubFolder = string.Empty;
             StatusMessage = $"{entry.Hostname} eklendi — tarayıcıda açılabilir";
             await LoadAsync();
         }

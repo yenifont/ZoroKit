@@ -7,7 +7,9 @@ public interface IAutoVirtualHostManager
     /// Hostname (örn. migrations.test) için www klasörü ve Apache vhost oluşturur;
     /// böylece tarayıcıda açıldığında localhost gibi çalışır.
     /// </summary>
-    Task EnsureVHostForHostnameAsync(string hostname, CancellationToken ct = default);
+    /// <param name="hostname">Domain adı (örn. sitem.com)</param>
+    /// <param name="subFolder">Opsiyonel: www altındaki mevcut klasör (örn. "zoro"). Null ise hostname'den türetilir.</param>
+    Task EnsureVHostForHostnameAsync(string hostname, string? subFolder = null, CancellationToken ct = default);
     /// <summary>
     /// İlk kurulumda varsayılan zorokit.app host kaydı ve ana www vhost'unu ekler.
     /// </summary>
