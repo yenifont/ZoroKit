@@ -124,6 +124,19 @@
                                                                      VerticalAlignment="Center" />
                                             <TextBlock Text="{Binding Hostname}" Foreground="{StaticResource PrimaryTextBrush}"
                                                        FontWeight="SemiBold" FontSize="12.5" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding SubFolderDisplay}" Foreground="{StaticResource MutedTextBrush}"
+                                                       FontFamily="Consolas" FontSize="11" VerticalAlignment="Center"
+                                                       Margin="8,0,0,0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SubFolderDisplay}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                         </StackPanel>
                                     </DockPanel>
                                 </Border>

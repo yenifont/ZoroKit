@@ -157,6 +157,51 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
         }
     }
 
+    private static readonly Regex DocumentRootRegex = new(
+        @"DocumentRoot\s+""([^""]+)""",
+        RegexOptions.Compiled);
+
+    public async Task<string?> GetSubFolderForHostnameAsync(string hostname, CancellationToken ct = default)
+    {
+        var sitesDir = Path.Combine(_basePath, Defaults.SitesEnabledDir);
+        if (!Directory.Exists(sitesDir)) return null;
+
+        var config = await _configManager.LoadAsync(ct);
+        var wwwPath = Path.GetFullPath(Path.Combine(_basePath, config.DocumentRoot)).Replace('\\', '/').TrimEnd('/');
+
+        // manual.hostname.conf, auto.hostname.conf, 000-default.hostname.conf sırasıyla ara
+        string[] prefixes = ["manual.", "auto.", "000-default."];
+        foreach (var prefix in prefixes)
+        {
+            var confPath = Path.Combine(sitesDir, $"{prefix}{hostname}.conf");
+            if (!File.Exists(confPath)) continue;
+
+            try
+            {
+                var content = await File.ReadAllTextAsync(confPath, ct);
+                var match = DocumentRootRegex.Match(content);
+                if (!match.Success) continue;
+
+                var docRoot = match.Groups[1].Value.TrimEnd('/');
+
+                // wwwPath ile karşılaştır — eşitse alt klasör yok
+                if (string.Equals(docRoot, wwwPath, StringComparison.OrdinalIgnoreCase))
+                    return null;
+
+                // www/ altındaki alt klasör adını çıkar
+                var wwwPrefix = wwwPath + "/";
+                if (docRoot.StartsWith(wwwPrefix, StringComparison.OrdinalIgnoreCase))
+                    return docRoot[wwwPrefix.Length..];
+            }
+            catch
+            {
+                // Dosya okunamadıysa sonraki prefix'e geç
+            }
+        }
+
+        return null;
+    }
+
     public async Task EnsureVHostForHostnameAsync(string hostname, string? subFolder = null, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(hostname)) return;

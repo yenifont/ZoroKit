@@ -18,6 +18,7 @@ public sealed partial class HostsFileViewModel : ObservableObject
     private readonly IAutoVirtualHostManager _autoVHostManager;
     private readonly IServiceController _apacheController;
     private readonly DialogService _dialogService;
+    private readonly ToastService _toastService;
 
     [ObservableProperty]
     private string _newIpAddress = "127.0.0.1";
@@ -40,12 +41,14 @@ public sealed partial class HostsFileViewModel : ObservableObject
         IHostsFileManager hostsFileManager,
         IAutoVirtualHostManager autoVHostManager,
         IServiceController apacheController,
-        DialogService dialogService)
+        DialogService dialogService,
+        ToastService toastService)
     {
         _hostsFileManager = hostsFileManager;
         _autoVHostManager = autoVHostManager;
         _apacheController = apacheController;
         _dialogService = dialogService;
+        _toastService = toastService;
         _ = LoadAsync();
     }
 
@@ -57,7 +60,14 @@ public sealed partial class HostsFileViewModel : ObservableObject
             var entries = await _hostsFileManager.GetManagedEntriesAsync();
             Entries.Clear();
             foreach (var entry in entries)
+            {
+                try
+                {
+                    entry.SubFolder = await _autoVHostManager.GetSubFolderForHostnameAsync(entry.Hostname);
+                }
+                catch { /* alt klasör bilgisi opsiyonel */ }
                 Entries.Add(entry);
+            }
         }
         catch (Exception ex)
         {
@@ -109,9 +119,10 @@ public sealed partial class HostsFileViewModel : ObservableObject
                 _dialogService.ShowError(ex.Message, "Klasör Bulunamadı");
                 return;
             }
-            catch
+            catch (Exception ex)
             {
-                /* vhost/reload best-effort; hosts kaydı zaten eklendi */
+                // Hosts kaydı eklendi ama vhost/reload başarısız
+                _toastService.ShowWarning($"Hosts kaydı eklendi ancak VHost yapılandırması başarısız: {ex.Message}");
             }
 
             NewHostname = string.Empty;

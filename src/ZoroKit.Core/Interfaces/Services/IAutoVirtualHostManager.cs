@@ -14,6 +14,11 @@ public interface IAutoVirtualHostManager
     /// İlk kurulumda varsayılan zorokit.app host kaydı ve ana www vhost'unu ekler.
     /// </summary>
     Task EnsureDefaultZoroKitHostAsync(CancellationToken ct = default);
+    /// <summary>
+    /// Hostname için tanımlı VHost conf dosyasından alt klasör bilgisini döndürür.
+    /// Alt klasör yoksa veya DocumentRoot doğrudan www ise null döner.
+    /// </summary>
+    Task<string?> GetSubFolderForHostnameAsync(string hostname, CancellationToken ct = default);
     Task StartWatchingAsync(CancellationToken ct = default);
     Task StopWatchingAsync();
     IReadOnlyList<string> GetDetectedSites();
