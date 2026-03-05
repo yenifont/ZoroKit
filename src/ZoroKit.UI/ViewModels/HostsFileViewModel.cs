@@ -144,6 +144,19 @@ public sealed partial class HostsFileViewModel : ObservableObject
         try
         {
             await _hostsFileManager.RemoveEntryAsync(entry.Hostname);
+
+            try
+            {
+                await _autoVHostManager.RemoveVHostForHostnameAsync(entry.Hostname);
+                var status = await _apacheController.GetStatusAsync();
+                if (status == ServiceStatus.Running)
+                    await _apacheController.ReloadAsync();
+            }
+            catch
+            {
+                /* vhost silme/reload best-effort; hosts kaydı zaten kaldırıldı */
+            }
+
             StatusMessage = $"{entry.Hostname} kaldırıldı";
             await LoadAsync();
         }

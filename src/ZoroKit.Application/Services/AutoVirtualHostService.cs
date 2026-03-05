@@ -202,6 +202,32 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
         return null;
     }
 
+    public Task RemoveVHostForHostnameAsync(string hostname, CancellationToken ct = default)
+    {
+        var sitesDir = Path.Combine(_basePath, Defaults.SitesEnabledDir);
+        if (!Directory.Exists(sitesDir)) return Task.CompletedTask;
+
+        string[] prefixes = ["manual.", "auto.", "000-default."];
+        foreach (var prefix in prefixes)
+        {
+            // Normal conf
+            var confPath = Path.Combine(sitesDir, $"{prefix}{hostname}.conf");
+            if (_fileSystem.FileExists(confPath))
+            {
+                try { _fileSystem.DeleteFile(confPath); } catch { }
+            }
+
+            // SSL conf
+            var sslConfPath = Path.Combine(sitesDir, $"{prefix}{hostname}-ssl.conf");
+            if (_fileSystem.FileExists(sslConfPath))
+            {
+                try { _fileSystem.DeleteFile(sslConfPath); } catch { }
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
     public async Task EnsureVHostForHostnameAsync(string hostname, string? subFolder = null, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(hostname)) return;

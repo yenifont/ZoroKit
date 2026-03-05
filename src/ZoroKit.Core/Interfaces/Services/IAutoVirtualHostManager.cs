@@ -19,6 +19,10 @@ public interface IAutoVirtualHostManager
     /// Alt klasör yoksa veya DocumentRoot doğrudan www ise null döner.
     /// </summary>
     Task<string?> GetSubFolderForHostnameAsync(string hostname, CancellationToken ct = default);
+    /// <summary>
+    /// Hostname'e ait VHost conf dosyalarını (manual.*, auto.*, SSL dahil) siler.
+    /// </summary>
+    Task RemoveVHostForHostnameAsync(string hostname, CancellationToken ct = default);
     Task StartWatchingAsync(CancellationToken ct = default);
     Task StopWatchingAsync();
     IReadOnlyList<string> GetDetectedSites();
