@@ -16,6 +16,7 @@ public sealed class ApacheService : IServiceController
     private readonly IConfigurationManager _configManager;
     private readonly IFileSystem _fileSystem;
     private readonly ApacheConfigGenerator _configGenerator;
+    private readonly ILogRotationService? _logRotation;
     private readonly string _basePath;
     private int? _processId;
 
@@ -30,7 +31,8 @@ public sealed class ApacheService : IServiceController
         IConfigurationManager configManager,
         IFileSystem fileSystem,
         ApacheConfigGenerator configGenerator,
-        string basePath)
+        string basePath,
+        ILogRotationService? logRotation = null)
     {
         _versionManager = versionManager;
         _processManager = processManager;
@@ -39,6 +41,7 @@ public sealed class ApacheService : IServiceController
         _fileSystem = fileSystem;
         _configGenerator = configGenerator;
         _basePath = basePath;
+        _logRotation = logRotation;
     }
 
     public async Task StartAsync(CancellationToken ct = default)
@@ -190,6 +193,19 @@ public sealed class ApacheService : IServiceController
         {
             _processId = null;
             SetStatus(ServiceStatus.Stopped);
+
+            // Rotate logs after stop (file locks released)
+            if (_logRotation != null)
+            {
+                try
+                {
+                    var errorLog = Path.Combine(_basePath, Defaults.LogDir, "apache", "error.log");
+                    var accessLog = Path.Combine(_basePath, Defaults.LogDir, "apache", "access.log");
+                    await _logRotation.RotateIfNeededAsync(errorLog, ct);
+                    await _logRotation.RotateIfNeededAsync(accessLog, ct);
+                }
+                catch { /* best effort */ }
+            }
         }
     }
 

@@ -12,6 +12,7 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
     private readonly IFileSystem _fileSystem;
     private readonly IHostsFileManager _hostsManager;
     private readonly IConfigurationManager _configManager;
+    private readonly ISslCertificateManager _sslManager;
     private readonly string _basePath;
     private FileSystemWatcher? _watcher;
     private readonly List<string> _detectedSites = [];
@@ -29,11 +30,13 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
         IFileSystem fileSystem,
         IHostsFileManager hostsManager,
         IConfigurationManager configManager,
+        ISslCertificateManager sslManager,
         string basePath)
     {
         _fileSystem = fileSystem;
         _hostsManager = hostsManager;
         _configManager = configManager;
+        _sslManager = sslManager;
         _basePath = basePath;
     }
 
@@ -102,18 +105,20 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
                 var confPath = Path.Combine(sitesDir, $"auto.{hostname}.conf");
                 await _fileSystem.WriteAllTextAsync(confPath, vhostConf, ct);
 
-                // SSL vhost if enabled
+                // SSL vhost if enabled — auto-generate certificate if missing
                 if (config.SslEnabled)
                 {
-                    var sslDir = Path.Combine(_basePath, Defaults.SslDir);
-                    var certPath = Path.Combine(sslDir, $"{hostname}.crt").Replace('\\', '/');
-                    var keyPath = Path.Combine(sslDir, $"{hostname}.key").Replace('\\', '/');
-
-                    if (File.Exists(certPath.Replace('/', '\\')))
+                    try
                     {
-                        var sslConf = GenerateSslVHostConf(hostname, docRoot, config.ApacheSslPort, certPath, keyPath);
+                        var (certPath, keyPath) = await _sslManager.EnsureDomainCertificateAsync(hostname, ct);
+                        var sslConf = GenerateSslVHostConf(hostname, docRoot, config.ApacheSslPort,
+                            certPath.Replace('\\', '/'), keyPath.Replace('\\', '/'));
                         var sslConfPath = Path.Combine(sitesDir, $"auto.{hostname}-ssl.conf");
                         await _fileSystem.WriteAllTextAsync(sslConfPath, sslConf, ct);
+                    }
+                    catch
+                    {
+                        // Sertifika üretilemezse HTTP vhost yine çalışsın
                     }
                 }
 
@@ -278,6 +283,23 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
         var vhostConf = GenerateVHostConf(hostname, docRoot, config.ApachePort);
         var confPath = Path.Combine(sitesDir, $"manual.{hostname}.conf");
         await _fileSystem.WriteAllTextAsync(confPath, vhostConf, ct);
+
+        // SSL vhost for manual hostname — auto-generate certificate if missing
+        if (config.SslEnabled)
+        {
+            try
+            {
+                var (certPath, keyPath) = await _sslManager.EnsureDomainCertificateAsync(hostname, ct);
+                var sslConf = GenerateSslVHostConf(hostname, docRoot, config.ApacheSslPort,
+                    certPath.Replace('\\', '/'), keyPath.Replace('\\', '/'));
+                var sslConfPath = Path.Combine(sitesDir, $"manual.{hostname}-ssl.conf");
+                await _fileSystem.WriteAllTextAsync(sslConfPath, sslConf, ct);
+            }
+            catch
+            {
+                // Sertifika üretilemezse HTTP vhost yine çalışsın
+            }
+        }
     }
 
     public async Task EnsureDefaultZoroKitHostAsync(CancellationToken ct = default)

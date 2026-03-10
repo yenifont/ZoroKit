@@ -18,6 +18,7 @@ public sealed class MariaDbService : IServiceController
     private readonly IConfigurationManager _configManager;
     private readonly IFileSystem _fileSystem;
     private readonly MariaDbConfigGenerator _configGenerator;
+    private readonly ILogRotationService? _logRotation;
     private readonly string _basePath;
     private int? _processId;
 
@@ -32,7 +33,8 @@ public sealed class MariaDbService : IServiceController
         IConfigurationManager configManager,
         IFileSystem fileSystem,
         MariaDbConfigGenerator configGenerator,
-        string basePath)
+        string basePath,
+        ILogRotationService? logRotation = null)
     {
         _versionManager = versionManager;
         _processManager = processManager;
@@ -41,6 +43,7 @@ public sealed class MariaDbService : IServiceController
         _fileSystem = fileSystem;
         _configGenerator = configGenerator;
         _basePath = basePath;
+        _logRotation = logRotation;
     }
 
     public async Task StartAsync(CancellationToken ct = default)
@@ -177,6 +180,17 @@ public sealed class MariaDbService : IServiceController
         {
             _processId = null;
             SetStatus(ServiceStatus.Stopped);
+
+            // Rotate logs after stop (file locks released)
+            if (_logRotation != null)
+            {
+                try
+                {
+                    var errorLog = Path.Combine(_basePath, Defaults.LogDir, "mariadb-error.log");
+                    await _logRotation.RotateIfNeededAsync(errorLog, ct);
+                }
+                catch { /* best effort */ }
+            }
         }
     }
 

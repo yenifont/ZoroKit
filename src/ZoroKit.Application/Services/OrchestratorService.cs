@@ -21,6 +21,7 @@ public sealed class OrchestratorService
     private readonly IAutoVirtualHostManager _autoVHostManager;
     private readonly IPortManager _portManager;
     private readonly HttpClient _httpClient;
+    private readonly ILogRotationService _logRotation;
     private readonly string _basePath;
     private readonly Action<string>? _onPortConflictResolved;
 
@@ -36,6 +37,7 @@ public sealed class OrchestratorService
         IAutoVirtualHostManager autoVHostManager,
         IPortManager portManager,
         HttpClient httpClient,
+        ILogRotationService logRotation,
         string basePath,
         Action<string>? onPortConflictResolved = null)
     {
@@ -50,6 +52,7 @@ public sealed class OrchestratorService
         _autoVHostManager = autoVHostManager;
         _portManager = portManager;
         _httpClient = httpClient;
+        _logRotation = logRotation;
         _basePath = basePath;
         _onPortConflictResolved = onPortConflictResolved;
     }
@@ -99,6 +102,16 @@ public sealed class OrchestratorService
         await Task.WhenAll(
             _apacheController.DetectRunningAsync(ct),
             _mariaDbController.DetectRunningAsync(ct));
+
+        // Rotate logs before watchers start (best effort)
+        try
+        {
+            var apacheRunning = _apacheController.Status == ServiceStatus.Running;
+            var mariaRunning = _mariaDbController.Status == ServiceStatus.Running;
+            await _logRotation.RotateAllAsync(apacheRunning, mariaRunning, ct);
+            await _logRotation.CleanupOldLogsAsync(ct);
+        }
+        catch { /* best effort */ }
 
         // Start log watchers — run in parallel
         var apacheErrorLog = Path.Combine(_basePath, Defaults.LogDir, "apache", "error.log");

@@ -39,6 +39,9 @@
         <DataTemplate DataType="{x:Type vm:UpdatesViewModel}">
             <views:UpdatesView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ToolsViewModel}">
+            <views:ToolsView />
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -202,6 +205,14 @@
                                 <materialDesign:PackIcon Kind="FileDocument" Width="17" Height="17"
                                                          VerticalAlignment="Center" Margin="0,0,10,0" />
                                 <TextBlock Text="Hosts File" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource NavButtonStyle}"
+                                Command="{Binding NavigateToCommand}" CommandParameter="Tools">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="DatabaseCog" Width="17" Height="17"
+                                                         VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <TextBlock Text="Ara&#231;lar" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource NavButtonStyle}"

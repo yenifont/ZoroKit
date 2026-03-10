@@ -38,10 +38,15 @@ public static class Defaults
     public const string VcRedistFileName = "vc_redist.x64.exe";
 
     // App update (GitHub)
-    public const string AppVersion = "1.0.21";
+    public const string AppVersion = "1.0.22";
     public const string GitHubOwner = "yenifont";
     public const string GitHubRepo = "ZoroKit";
     public const string GitHubReleasesApi = $"https://api.github.com/repos/{GitHubOwner}/{GitHubRepo}/releases/latest";
+
+    // Log Rotation
+    public const long LogRotationMaxBytes = 10 * 1024 * 1024; // 10 MB
+    public const int LogRotationMaxFiles = 5;
+    public const int LogRotationMaxAgeDays = 30;
 
     public static readonly string[] DefaultPhpExtensions =
     [

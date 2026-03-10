@@ -666,6 +666,10 @@ public partial class App : System.Windows.Application
         services.AddSingleton<PhpIniGenerator>();
         services.AddSingleton<MariaDbConfigGenerator>();
 
+        // Log Rotation
+        services.AddSingleton<ILogRotationService>(sp =>
+            new LogRotationService(sp.GetRequiredService<IFileSystem>(), basePath));
+
         // Apache Service Controller
         services.AddSingleton<IServiceController>(sp =>
             new ApacheService(
@@ -675,7 +679,8 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<IConfigurationManager>(),
                 sp.GetRequiredService<IFileSystem>(),
                 sp.GetRequiredService<ApacheConfigGenerator>(),
-                basePath));
+                basePath,
+                sp.GetRequiredService<ILogRotationService>()));
 
         // MariaDB Service Controller (registered as concrete type to distinguish from Apache)
         services.AddSingleton<MariaDbService>(sp =>
@@ -686,7 +691,8 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<IConfigurationManager>(),
                 sp.GetRequiredService<IFileSystem>(),
                 sp.GetRequiredService<MariaDbConfigGenerator>(),
-                basePath));
+                basePath,
+                sp.GetRequiredService<ILogRotationService>()));
 
         // PHP Service
         services.AddSingleton<PhpService>(sp =>
@@ -710,6 +716,7 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<IFileSystem>(),
                 sp.GetRequiredService<IHostsFileManager>(),
                 sp.GetRequiredService<IConfigurationManager>(),
+                sp.GetRequiredService<ISslCertificateManager>(),
                 basePath));
 
         // SSL Certificate Manager
@@ -745,6 +752,7 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<IAutoVirtualHostManager>(),
                 sp.GetRequiredService<IPortManager>(),
                 sp.GetRequiredService<HttpClient>(),
+                sp.GetRequiredService<ILogRotationService>(),
                 basePath,
                 onPortConflictResolved: msg => sp.GetRequiredService<ToastService>().ShowInfo(msg)));
 
@@ -792,6 +800,14 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<ToastService>(),
                 sp.GetRequiredService<DashboardViewModel>(),
                 basePath));
+        services.AddTransient<ToolsViewModel>(sp =>
+            new ToolsViewModel(
+                sp.GetRequiredService<IConfigurationManager>(),
+                sp.GetRequiredService<MariaDbService>(),
+                sp.GetRequiredService<IVersionManager>(),
+                sp.GetRequiredService<DialogService>(),
+                sp.GetRequiredService<ToastService>(),
+                basePath));
         services.AddTransient<HostsFileViewModel>();
         services.AddSingleton<LogViewModel>();
         services.AddTransient<UpdatesViewModel>(sp =>
@@ -817,6 +833,7 @@ public partial class App : System.Windows.Application
             nav.RegisterView("PHP", () => sp.GetRequiredService<PhpViewModel>());
             nav.RegisterView("Settings", () => sp.GetRequiredService<SettingsViewModel>());
             nav.RegisterView("HostsFile", () => sp.GetRequiredService<HostsFileViewModel>());
+            nav.RegisterView("Tools", () => sp.GetRequiredService<ToolsViewModel>());
             nav.RegisterView("Logs", () => sp.GetRequiredService<LogViewModel>());
             nav.RegisterView("Updates", () => sp.GetRequiredService<UpdatesViewModel>());
 
