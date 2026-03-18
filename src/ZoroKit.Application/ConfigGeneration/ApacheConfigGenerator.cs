@@ -47,10 +47,11 @@ public sealed class ApacheConfigGenerator
             sslConfig = $"""
 
             # SSL (cipher suite, protocol, session cache)
+            LoadModule socache_shmcb_module modules/mod_socache_shmcb.so
             LoadModule ssl_module modules/mod_ssl.so
             Listen 127.0.0.1:{sslPort}
             SSLCipherSuite HIGH:!aNULL:!MD5:!RC4:!3DES:!CAMELLIA
-            SSLProtocol TLSv1.2 TLSv1.3
+            SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
             SSLSessionCache "shmcb:{sslCachePath}"
             SSLSessionCacheTimeout 300
             SSLRandomSeed startup builtin
