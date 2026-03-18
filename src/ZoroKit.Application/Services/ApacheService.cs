@@ -174,15 +174,18 @@ public sealed class ApacheService : IServiceController
             var (_, stderr, exitCode) = await _processManager.RunCommandAsync(
                 httpdPath, $"-f \"{configPath}\" -k stop", null, ct);
 
-            // Wait for graceful shutdown (max 3 seconds)
-            for (int i = 0; i < 15; i++)
+            if (exitCode == 0)
             {
-                if (!await _processManager.IsProcessRunningAsync(_processId.Value, ct))
-                    break;
-                await Task.Delay(200, ct);
+                // Graceful stop accepted — wait for process to exit (max 3 seconds)
+                for (int i = 0; i < 15; i++)
+                {
+                    if (!await _processManager.IsProcessRunningAsync(_processId.Value, ct))
+                        break;
+                    await Task.Delay(200, ct);
+                }
             }
 
-            // Force kill if still running
+            // Force kill if still running (konsol modunda -k stop çalışmayabilir)
             if (await _processManager.IsProcessRunningAsync(_processId.Value, ct))
             {
                 await _processManager.KillProcessAsync(_processId.Value, ct);
@@ -211,7 +214,19 @@ public sealed class ApacheService : IServiceController
 
     public async Task RestartAsync(CancellationToken ct = default)
     {
+        // Port numarasını durdurma öncesi al
+        var config = await _configManager.LoadAsync(ct);
+
         await StopAsync(ct);
+
+        // Port tamamen serbest kalana kadar bekle (Apache parent+child process temizliği)
+        for (int i = 0; i < 20; i++)
+        {
+            if (await _portManager.IsPortAvailableAsync(config.ApachePort, ct))
+                break;
+            await Task.Delay(250, ct);
+        }
+
         await StartAsync(ct);
     }
 
@@ -220,8 +235,8 @@ public sealed class ApacheService : IServiceController
         if (Status != ServiceStatus.Running)
             return;
 
-        // Windows'ta graceful restart güvenilir çalışmayabiliyor,
-        // tam restart (stop + start) ile VHost konfigürasyonlarının yüklenmesini garanti ediyoruz
+        // Windows konsol modunda httpd -k graceful/restart çalışmaz;
+        // tam restart (stop + start) ile yapılandırmanın yüklenmesini garanti ediyoruz
         await RestartAsync(ct);
     }
 
