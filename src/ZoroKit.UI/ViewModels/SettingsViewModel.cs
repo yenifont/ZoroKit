@@ -116,7 +116,7 @@ public sealed partial class SettingsViewModel : ObservableObject
             var oldSslPort = config.ApacheSslPort;
 
             // SSL etkinleştiriliyorsa sertifika kontrolü
-            if (SslEnabled && !oldSslEnabled && !HasSslCertificate)
+            if (SslEnabled && !HasSslCertificate)
             {
                 try
                 {
@@ -153,6 +153,18 @@ public sealed partial class SettingsViewModel : ObservableObject
             if (SslEnabled)
             {
                 await GenerateSslVHostsForExistingDomainsAsync(config);
+
+                // CA sertifikasını Windows Trust Store'a ekle
+                // (Chrome, .app/.dev/.page gibi HSTS preloaded TLD'lerde
+                //  güvenilir CA olmadan HTTPS'e izin vermiyor)
+                if (HasSslCertificate)
+                {
+                    try
+                    {
+                        await _sslManager.TrustCaCertificateAsync();
+                    }
+                    catch { /* Trust Store erişimi başarısız olabilir */ }
+                }
             }
             // SSL kapatıldıysa SSL VHost dosyalarını temizle
             else if (oldSslEnabled)
