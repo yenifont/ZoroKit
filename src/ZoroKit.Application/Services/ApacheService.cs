@@ -71,11 +71,11 @@ public sealed class ApacheService : IServiceController
             catch (VersionNotFoundException)
             {
                 throw new ServiceStartException("Apache",
-                    "No Apache version installed. Go to the Apache page, fetch available versions, and download one first.");
+                    "Apache sürümü yüklü değil. Apache sayfasından bir sürüm indirin.");
             }
 
             if (!_fileSystem.FileExists(httpdPath))
-                throw new ServiceStartException("Apache", $"httpd.exe not found at: {httpdPath}");
+                throw new ServiceStartException("Apache", $"httpd.exe bulunamadı: {httpdPath}");
 
             // Get PHP version info early — needed for DLL copy before validation
             var phpVersion = await _versionManager.GetActiveVersionAsync(ServiceType.Php, ct);
@@ -330,7 +330,7 @@ public sealed class ApacheService : IServiceController
         var apacheVersion = await _versionManager.GetActiveVersionAsync(ServiceType.Apache, ct);
         var phpVersion = await _versionManager.GetActiveVersionAsync(ServiceType.Php, ct);
 
-        if (apacheVersion == null) throw new ServiceStartException("Apache", "No active Apache version.");
+        if (apacheVersion == null) throw new ServiceStartException("Apache", "Aktif Apache sürümü bulunamadı.");
 
         var serverRoot = apacheVersion.InstallPath;
         var docRoot = _fileSystem.GetFullPath(Path.Combine(_basePath, config.DocumentRoot));

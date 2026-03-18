@@ -73,11 +73,11 @@ public sealed class MariaDbService : IServiceController
             catch (VersionNotFoundException)
             {
                 throw new ServiceStartException("MariaDB",
-                    "No MariaDB version installed. Go to the MariaDB page, fetch available versions, and download one first.");
+                    "MariaDB sürümü yüklü değil. MariaDB sayfasından bir sürüm indirin.");
             }
 
             if (!_fileSystem.FileExists(mysqldPath))
-                throw new ServiceStartException("MariaDB", $"mysqld.exe not found at: {mysqldPath}");
+                throw new ServiceStartException("MariaDB", $"mysqld.exe bulunamadı: {mysqldPath}");
 
             // Initialize data directory if first run
             var dataDir = GetDataDir();
@@ -125,8 +125,8 @@ public sealed class MariaDbService : IServiceController
             var errorDetail = ReadLastErrorLogLine();
             throw new ServiceStartException("MariaDB",
                 string.IsNullOrEmpty(errorDetail)
-                    ? "Process exited immediately after start."
-                    : $"Process exited immediately: {errorDetail}");
+                    ? "MariaDB başlatıldıktan hemen sonra kapandı. Hata logunu kontrol edin."
+                    : $"MariaDB başlatılamadı: {errorDetail}");
         }
         catch (Exception) when (Status == ServiceStatus.Starting)
         {
@@ -319,7 +319,7 @@ public sealed class MariaDbService : IServiceController
     private async Task GenerateConfigAsync(AppConfiguration config, CancellationToken ct)
     {
         var active = await _versionManager.GetActiveVersionAsync(ServiceType.MariaDb, ct)
-            ?? throw new ServiceStartException("MariaDB", "No active MariaDB version.");
+            ?? throw new ServiceStartException("MariaDB", "Aktif MariaDB sürümü bulunamadı.");
 
         var dataDir = GetDataDir();
         var configDir = Path.Combine(_basePath, Defaults.MariaDbConfigDir);

@@ -86,6 +86,18 @@ ClickFinish=Kurulumu tamamlamak icin Bitir'e tiklayin.
 ; Masaustu ve Baslat kisayollari [Icons] icinde Tasks olmadan her zaman olusur; bu gorevler sadece bilgi.
 Name: "startupicon"; Description: "Windows ile birlikte baslat"; GroupDescription: "Ek gorevler:"; Flags: unchecked
 
+[Dirs]
+; Kullanici yazma izni — app non-admin calisir, config/log/www dosyalarina yazabilmeli
+Name: "{app}"; Permissions: users-modify
+Name: "{app}\config"; Permissions: users-modify
+Name: "{app}\logs"; Permissions: users-modify
+Name: "{app}\www"; Permissions: users-modify
+Name: "{app}\bin"; Permissions: users-modify
+Name: "{app}\apps"; Permissions: users-modify
+Name: "{app}\mariadb"; Permissions: users-modify
+Name: "{app}\backups"; Permissions: users-modify
+Name: "{app}\temp"; Permissions: users-modify
+
 [Files]
 ; VC++ Redistributable (bundled — installed silently during setup)
 Source: "deps\vc_redist.x64.exe"; DestDir: "{tmp}"; Flags: ignoreversion skipifsourcedoesntexist deleteafterinstall

@@ -193,8 +193,9 @@ public sealed partial class DashboardViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Hata: {ex.Message}";
-            _toastService.ShowError($"Apache başlatılamadı: {ex.Message}");
+            var msg = TurkceHata(ex);
+            StatusMessage = $"Hata: {msg}";
+            _toastService.ShowError($"Apache başlatılamadı: {msg}");
         }
         finally { IsBusy = false; }
     }
@@ -302,8 +303,9 @@ public sealed partial class DashboardViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Hata: {ex.Message}";
-            _toastService.ShowError($"MariaDB başlatılamadı: {ex.Message}");
+            var msg = TurkceHata(ex);
+            StatusMessage = $"Hata: {msg}";
+            _toastService.ShowError($"MariaDB başlatılamadı: {msg}");
         }
         finally { IsBusy = false; }
     }
@@ -560,8 +562,9 @@ public sealed partial class DashboardViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Hata: {ex.Message}";
-            _dialogService.ShowError(ex.Message, "Başlatma Başarısız");
+            var msg = TurkceHata(ex);
+            StatusMessage = $"Hata: {msg}";
+            _dialogService.ShowError(msg, "Başlatma Başarısız");
         }
         finally { IsBusy = false; }
     }
@@ -1060,4 +1063,13 @@ public sealed partial class DashboardViewModel : ObservableObject
             _toastService.ShowError($"Port temizlenemedi: {ex.Message}");
         }
     }
+
+    /// <summary>.NET framework exception mesajlarını Türkçe'ye çevirir.</summary>
+    private static string TurkceHata(Exception ex) => ex switch
+    {
+        UnauthorizedAccessException => "Erişim reddedildi. ZoroKit kurulum dizininde yazma izni yok. Kurulumu tekrar çalıştırın veya dizin izinlerini kontrol edin.",
+        IOException io when io.Message.Contains("being used by another process", StringComparison.OrdinalIgnoreCase)
+            => "Dosya başka bir işlem tarafından kullanılıyor.",
+        _ => ex.Message
+    };
 }
