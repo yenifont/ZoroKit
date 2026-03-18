@@ -485,6 +485,11 @@ public sealed partial class DashboardViewModel : ObservableObject
                 """;
             await File.WriteAllTextAsync(Path.Combine(aliasDir, "phpmyadmin.conf"), aliasConf);
 
+            // Apache çalışıyorsa alias'ı yüklemesi için yeniden başlat
+            var status = await _apacheController.GetStatusAsync();
+            if (status == ServiceStatus.Running)
+                await _apacheController.ReloadAsync();
+
             // Cleanup
             Directory.Delete(tempExtract, true);
 

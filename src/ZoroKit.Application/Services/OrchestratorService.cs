@@ -193,6 +193,15 @@ public sealed class OrchestratorService
                 // Create Apache alias config
                 await EnsurePhpMyAdminAliasAsync(pmaPath, ct);
 
+                // Apache çalışıyorsa alias'ı yüklemesi için yeniden başlat
+                try
+                {
+                    var status = await _apacheController.GetStatusAsync(ct);
+                    if (status == ServiceStatus.Running)
+                        await _apacheController.ReloadAsync(ct);
+                }
+                catch { /* best-effort */ }
+
                 Directory.Delete(tempExtract, true);
             }
             finally

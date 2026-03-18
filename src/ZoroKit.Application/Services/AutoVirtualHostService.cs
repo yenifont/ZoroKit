@@ -271,10 +271,10 @@ public sealed class AutoVirtualHostService : IAutoVirtualHostManager, IDisposabl
                 _fileSystem.CreateDirectory(siteDir);
         }
 
+        // AutoVirtualHosts açıkken de manuel VHost oluştur (auto.* dosyaları ayrıca güncellenir)
         if (config.AutoVirtualHosts)
         {
             await ScanAndApplyAsync(ct);
-            return;
         }
 
         var sitesDir = Path.Combine(_basePath, Defaults.SitesEnabledDir);

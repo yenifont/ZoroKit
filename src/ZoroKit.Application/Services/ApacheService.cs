@@ -220,15 +220,9 @@ public sealed class ApacheService : IServiceController
         if (Status != ServiceStatus.Running)
             return;
 
-        var httpdPath = await _versionManager.GetBinaryPathAsync(ServiceType.Apache, ct);
-        var configPath = GetConfigPath();
-
-        // Regenerate config before reload
-        var config = await _configManager.LoadAsync(ct);
-        await GenerateConfigAsync(config, ct);
-
-        await _processManager.RunCommandAsync(
-            httpdPath, $"-f \"{configPath}\" -k graceful", null, ct);
+        // Windows'ta graceful restart güvenilir çalışmayabiliyor,
+        // tam restart (stop + start) ile VHost konfigürasyonlarının yüklenmesini garanti ediyoruz
+        await RestartAsync(ct);
     }
 
     public async Task<bool> ValidateConfigAsync(CancellationToken ct = default)
