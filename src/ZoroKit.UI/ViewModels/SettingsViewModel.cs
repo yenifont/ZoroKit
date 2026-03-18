@@ -148,13 +148,14 @@ public sealed partial class SettingsViewModel : ObservableObject
             _dashboardViewModel.ApachePort = ApachePort;
             _dashboardViewModel.MysqlPort = MysqlPort;
 
-            // SSL yeni etkinleştirildiyse mevcut domain'ler için SSL VHost oluştur
-            if (SslEnabled && !oldSslEnabled)
+            // SSL etkinse mevcut domain'ler için eksik SSL VHost ve sertifikaları oluştur
+            // (her kaydetmede kontrol — önceki başarısız denemeleri telafi eder)
+            if (SslEnabled)
             {
                 await GenerateSslVHostsForExistingDomainsAsync(config);
             }
             // SSL kapatıldıysa SSL VHost dosyalarını temizle
-            else if (!SslEnabled && oldSslEnabled)
+            else if (oldSslEnabled)
             {
                 CleanupSslVHostConfigs();
             }
