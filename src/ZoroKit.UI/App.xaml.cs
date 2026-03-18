@@ -796,6 +796,7 @@ public partial class App : System.Windows.Application
                 sp.GetRequiredService<IConfigurationManager>(),
                 sp.GetRequiredService<OrchestratorService>(),
                 sp.GetRequiredService<ISslCertificateManager>(),
+                sp.GetRequiredService<IServiceController>(),
                 sp.GetRequiredService<DialogService>(),
                 sp.GetRequiredService<ToastService>(),
                 sp.GetRequiredService<DashboardViewModel>(),

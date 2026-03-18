@@ -1,9 +1,11 @@
 using System.IO;
+using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using ZoroKit.Application.Services;
 using ZoroKit.Core.Constants;
+using ZoroKit.Core.Enums;
 using ZoroKit.Core.Interfaces.Services;
 using ZoroKit.UI.Services;
 
@@ -14,6 +16,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly IConfigurationManager _configManager;
     private readonly OrchestratorService _orchestrator;
     private readonly ISslCertificateManager _sslManager;
+    private readonly IServiceController _apacheController;
     private readonly DialogService _dialogService;
     private readonly ToastService _toastService;
     private readonly DashboardViewModel _dashboardViewModel;
@@ -62,6 +65,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         IConfigurationManager configManager,
         OrchestratorService orchestrator,
         ISslCertificateManager sslManager,
+        IServiceController apacheController,
         DialogService dialogService,
         ToastService toastService,
         DashboardViewModel dashboardViewModel,
@@ -70,6 +74,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _configManager = configManager;
         _orchestrator = orchestrator;
         _sslManager = sslManager;
+        _apacheController = apacheController;
         _dialogService = dialogService;
         _toastService = toastService;
         _dashboardViewModel = dashboardViewModel;
@@ -106,6 +111,24 @@ public sealed partial class SettingsViewModel : ObservableObject
             var config = await _configManager.LoadAsync();
             var oldStartup = config.RunOnWindowsStartup;
             var oldPath = config.AddToSystemPath;
+            var oldSslEnabled = config.SslEnabled;
+            var oldApachePort = config.ApachePort;
+            var oldSslPort = config.ApacheSslPort;
+
+            // SSL etkinleştiriliyorsa sertifika kontrolü
+            if (SslEnabled && !oldSslEnabled && !HasSslCertificate)
+            {
+                try
+                {
+                    await _sslManager.EnsureCaCertificateAsync();
+                    HasSslCertificate = true;
+                }
+                catch (Exception ex)
+                {
+                    _dialogService.ShowError($"SSL sertifikası oluşturulamadı: {ex.Message}", "SSL Hatası");
+                    return;
+                }
+            }
 
             config.ApachePort = ApachePort;
             config.ApacheSslPort = ApacheSslPort;
@@ -125,6 +148,17 @@ public sealed partial class SettingsViewModel : ObservableObject
             _dashboardViewModel.ApachePort = ApachePort;
             _dashboardViewModel.MysqlPort = MysqlPort;
 
+            // SSL yeni etkinleştirildiyse mevcut domain'ler için SSL VHost oluştur
+            if (SslEnabled && !oldSslEnabled)
+            {
+                await GenerateSslVHostsForExistingDomainsAsync(config);
+            }
+            // SSL kapatıldıysa SSL VHost dosyalarını temizle
+            else if (!SslEnabled && oldSslEnabled)
+            {
+                CleanupSslVHostConfigs();
+            }
+
             // Handle Windows Startup toggle
             if (oldStartup != RunOnWindowsStartup)
                 ApplyWindowsStartup(RunOnWindowsStartup);
@@ -133,12 +167,94 @@ public sealed partial class SettingsViewModel : ObservableObject
             if (oldPath != AddToSystemPath)
                 ApplySystemPath(config, AddToSystemPath);
 
+            // Apache port veya SSL değiştiyse Apache'yi yeniden başlat
+            bool apacheSettingsChanged = oldApachePort != ApachePort
+                || oldSslPort != ApacheSslPort
+                || oldSslEnabled != SslEnabled;
+
+            if (apacheSettingsChanged)
+            {
+                var status = await _apacheController.GetStatusAsync();
+                if (status == ServiceStatus.Running)
+                {
+                    try
+                    {
+                        await _apacheController.ReloadAsync();
+                        StatusMessage = "Ayarlar kaydedildi — Apache yeniden başlatıldı";
+                        _toastService.ShowSuccess("Ayarlar kaydedildi — Apache yeniden başlatıldı");
+                    }
+                    catch (Exception ex)
+                    {
+                        _toastService.ShowWarning($"Ayarlar kaydedildi ancak Apache yeniden başlatılamadı: {ex.Message}");
+                    }
+                    return;
+                }
+            }
+
             StatusMessage = "Ayarlar kaydedildi";
             _toastService.ShowSuccess("Ayarlar kaydedildi");
         }
         catch (Exception ex)
         {
             _dialogService.ShowError(ex.Message, "Kaydetme Başarısız");
+        }
+    }
+
+    /// <summary>SSL etkinleştirildiğinde mevcut tüm VHost domain'leri için SSL sertifikası ve VHost oluşturur.</summary>
+    private async Task GenerateSslVHostsForExistingDomainsAsync(Core.Models.AppConfiguration config)
+    {
+        var sitesDir = Path.Combine(_basePath, Defaults.SitesEnabledDir);
+        if (!Directory.Exists(sitesDir)) return;
+
+        foreach (var confFile in Directory.GetFiles(sitesDir, "*.conf"))
+        {
+            var fileName = Path.GetFileName(confFile);
+            if (fileName.Contains("-ssl")) continue; // Mevcut SSL config'leri atla
+
+            try
+            {
+                var content = await File.ReadAllTextAsync(confFile);
+                var serverNameMatch = Regex.Match(content, @"ServerName\s+(\S+)");
+                var docRootMatch = Regex.Match(content, @"DocumentRoot\s+""([^""]+)""");
+                if (!serverNameMatch.Success || !docRootMatch.Success) continue;
+
+                var hostname = serverNameMatch.Groups[1].Value;
+                var docRoot = docRootMatch.Groups[1].Value;
+
+                var (certPath, keyPath) = await _sslManager.EnsureDomainCertificateAsync(hostname);
+
+                var sslConf = $"""
+                    <VirtualHost *:{config.ApacheSslPort}>
+                        DocumentRoot "{docRoot}"
+                        ServerName {hostname}
+                        SSLEngine on
+                        SSLCertificateFile "{certPath.Replace('\\', '/')}"
+                        SSLCertificateKeyFile "{keyPath.Replace('\\', '/')}"
+                        <Directory "{docRoot}">
+                            Options Indexes FollowSymLinks
+                            AllowOverride All
+                            Require all granted
+                        </Directory>
+                    </VirtualHost>
+                    """;
+
+                var baseName = Path.GetFileNameWithoutExtension(confFile);
+                var sslConfPath = Path.Combine(sitesDir, $"{baseName}-ssl.conf");
+                await File.WriteAllTextAsync(sslConfPath, sslConf);
+            }
+            catch { /* Sertifika üretilemezse o domain atlanır */ }
+        }
+    }
+
+    /// <summary>SSL kapatıldığında tüm SSL VHost config dosyalarını temizler.</summary>
+    private void CleanupSslVHostConfigs()
+    {
+        var sitesDir = Path.Combine(_basePath, Defaults.SitesEnabledDir);
+        if (!Directory.Exists(sitesDir)) return;
+
+        foreach (var sslConf in Directory.GetFiles(sitesDir, "*-ssl.conf"))
+        {
+            try { File.Delete(sslConf); } catch { }
         }
     }
 
