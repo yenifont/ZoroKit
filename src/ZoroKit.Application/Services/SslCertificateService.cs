@@ -133,17 +133,34 @@ public sealed class SslCertificateService : ISslCertificateManager
         {
             var caCertPath = Path.Combine(_sslDir, CaCertFile);
             var cert = X509CertificateLoader.LoadCertificateFromFile(caCertPath);
+            var currentThumbprint = cert.GetCertHashString();
 
             using var store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
             store.Open(OpenFlags.ReadWrite);
 
-            // Check if already trusted
+            // CA yeniden oluşturulmuşsa eski sertifikayı kaldır, yenisini ekle
             var existing = store.Certificates.Find(
                 X509FindType.FindBySubjectName, "ZoroKit Local CA", false);
-            if (existing.Count == 0)
+
+            var alreadyTrusted = false;
+            foreach (var old in existing)
+            {
+                if (old.GetCertHashString() == currentThumbprint)
+                {
+                    alreadyTrusted = true;
+                }
+                else
+                {
+                    // Eski/farklı CA — kaldır
+                    store.Remove(old);
+                }
+            }
+
+            if (!alreadyTrusted)
             {
                 store.Add(cert);
             }
+
             store.Close();
         }
         catch
